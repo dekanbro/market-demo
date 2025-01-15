@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { ChatWindow } from '@/app/components/ChatWindow'
 import { Item, items } from '../../data/items'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose } from "@/components/ui/drawer"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Badge } from "@/components/ui/badge"
+import { addons } from '@/app/data/addons'
 
 const chartData = [
   { name: 'Jan', price: 100 },
@@ -182,11 +183,12 @@ export default function ItemPage({ params }: { params: { id: string } }) {
         </div>
       </div>
       <Tabs defaultValue="chart" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="chart">Chart</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="links">Links</TabsTrigger>
           <TabsTrigger value="comments">Comments</TabsTrigger>
+          <TabsTrigger value="addons">Add-ons</TabsTrigger>
         </TabsList>
         <TabsContent value="chart">
           <Card>
@@ -253,6 +255,57 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                   </li>
                 ))}
               </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="addons">
+          <Card>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-6">
+                {addons.map((addon) => {
+                  const isAlreadySuper = addon.id === 'super' && item.type === 'super';
+                  
+                  return (
+                    <Card 
+                      key={addon.id} 
+                      className={`flex flex-col ${isAlreadySuper ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20' : ''}`}
+                    >
+                      <CardHeader>
+                        <div className="flex items-center gap-2">
+                          <Image 
+                            src={addon.icon} 
+                            alt={addon.title} 
+                            width={24} 
+                            height={24} 
+                          />
+                          <CardTitle className="text-lg">
+                            {addon.title}
+                            {isAlreadySuper && (
+                              <Badge className="ml-2 bg-purple-500">
+                                Active
+                              </Badge>
+                            )}
+                          </CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-muted-foreground">{addon.description}</p>
+                      </CardContent>
+                      <CardFooter className="mt-auto">
+                        <div className="flex items-center justify-between w-full">
+                          <p className="font-bold">{addon.price.toFixed(4)} ETH</p>
+                          <Button 
+                            variant={isAlreadySuper ? "secondary" : "outline"}
+                            disabled={item.status !== 'active' || item.comingSoon || isAlreadySuper}
+                          >
+                            {isAlreadySuper ? 'Added' : 'Add'}
+                          </Button>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

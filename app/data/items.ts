@@ -70,7 +70,7 @@ export const items: Item[] = [
     title: 'Phoenixborn',
     description: 'A fire-breathing performer raised by phoenixes. They teach the art of rebirth through flame dancing.',
     price: 0.0567,
-    image: "/placeholder.svg?height=200&width=200",
+    image: "/phoenixborn.webp",
     status: 'failed',
     type: 'none'
   },
