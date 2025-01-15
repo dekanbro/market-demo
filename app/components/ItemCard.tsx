@@ -5,6 +5,19 @@ import { Badge } from "@/components/ui/badge"
 import Image from 'next/image'
 import { Item } from '../data/items'
 
+const getStatusBadgeColor = (status: Item['status']) => {
+  switch (status) {
+    case 'featured':
+      return 'bg-blue-500';
+    case 'active':
+      return 'bg-green-500';
+    case 'failed':
+      return 'bg-red-500';
+    default:
+      return 'bg-gray-500';
+  }
+};
+
 export function ItemCard({ item }: { item: Item }) {
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-lg">
@@ -21,6 +34,19 @@ export function ItemCard({ item }: { item: Item }) {
               Coming Soon
             </Badge>
           )}
+          {item.status === 'failed' && (
+            <Badge className="absolute top-2 right-2 bg-red-500 text-white">
+              Failed
+            </Badge>
+          )}
+          {item.type === 'super' && (
+            <Badge className="absolute top-2 left-2 bg-purple-500 text-white">
+              Super Agent
+            </Badge>
+          )}
+          <Badge className={getStatusBadgeColor(item.status)}>
+            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+          </Badge>
         </div>
         <div className="p-4">
           <h2 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">{item.title}</h2>

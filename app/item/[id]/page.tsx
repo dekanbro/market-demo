@@ -2,17 +2,17 @@
 
 import { useState } from 'react'
 import { ChatWindow } from '@/app/components/ChatWindow'
-import { items } from '../../data/items'
+import { Item, items } from '../../data/items'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose } from "@/components/ui/drawer"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from 'next/image'
 import Link from 'next/link'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Badge } from "@/components/ui/badge"
 
 const chartData = [
   { name: 'Jan', price: 100 },
@@ -40,6 +40,19 @@ const commentsData = [
   { user: 'Bob', comment: 'Good value for money.' },
   { user: 'Charlie', comment: 'Arrived quickly and in perfect condition.' },
 ]
+
+const getStatusBadgeColor = (status: Item['status']) => {
+  switch (status) {
+    case 'featured':
+      return 'bg-blue-500';
+    case 'active':
+      return 'bg-green-500';
+    case 'failed':
+      return 'bg-red-500';
+    default:
+      return 'bg-gray-500';
+  }
+};
 
 export default function ItemPage({ params }: { params: { id: string } }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -79,19 +92,50 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                 fill
                 className="object-cover"
               />
+              {item.comingSoon && (
+                <Badge className="absolute top-2 right-2 bg-yellow-500 text-black">
+                  Coming Soon
+                </Badge>
+              )}
+              {item.status === 'failed' && (
+                <Badge className="absolute top-2 right-2 bg-red-500 text-white">
+                  Failed
+                </Badge>
+              )}
+              {item.type === 'super' && (
+                <Badge className="absolute top-2 left-2 bg-purple-500 text-white">
+                  Super Agent
+                </Badge>
+              )}
             </div>
           </div>
           <div className="md:w-1/2 p-6 md:p-8">
-            <h1 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">{item.title}</h1>
+            <div className="flex items-center gap-2 mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{item.title}</h1>
+              <Badge className={getStatusBadgeColor(item.status)}>
+                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+              </Badge>
+            </div>
             <p className="text-muted-foreground mb-4">{item.description}</p>
             <p className="text-xl md:text-2xl font-bold mb-6 text-primary">
               ${item.price.toFixed(4)}
             </p>
             <div className="flex space-x-4">
-              <Button className="flex-1">Buy</Button>
+              <Button 
+                className="flex-1" 
+                disabled={item.status !== 'active' || item.comingSoon}
+              >
+                Buy
+              </Button>
               <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <DrawerTrigger asChild>
-                  <Button variant="outline" className="flex-1">Chat</Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1" 
+                    disabled={item.comingSoon}
+                  >
+                    Chat
+                  </Button>
                 </DrawerTrigger>
                 <DrawerContent>
                   <DrawerHeader>
@@ -107,7 +151,11 @@ export default function ItemPage({ params }: { params: { id: string } }) {
               </Drawer>
               <Drawer open={isProfileDrawerOpen} onOpenChange={setIsProfileDrawerOpen}>
                 <DrawerTrigger asChild>
-                  <Button variant="secondary" className="flex-1">
+                  <Button 
+                    variant="secondary" 
+                    className="flex-1"
+                    disabled={item.comingSoon}
+                  >
                     Propose Profile Change
                   </Button>
                 </DrawerTrigger>
