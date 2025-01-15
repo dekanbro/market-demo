@@ -15,12 +15,16 @@ export function ChatWindow({
   itemId: number;
   initialMessage?: string;
 }) {
+  const defaultMessage = agentName === 'Summoner' 
+    ? "Greetings, seeker of creation. I am the Summoner, ready to help you manifest a new agent. Shall we begin the ritual? First, I'll need a Token Symbol (3-4 characters) for your agent."
+    : `Hello! I'm ${agentName}. How can I assist you today?`;
+
   const { messages, input, setInput, handleSubmit, isLoading } = useChat({
     initialMessages: [
       {
         id: 'initial-message',
         role: 'assistant',
-        content: initialMessage || `Hello! I'm ${agentName}. How can I assist you today?`,
+        content: initialMessage || defaultMessage,
       },
     ],
     itemId: itemId

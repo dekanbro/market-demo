@@ -24,9 +24,9 @@ const chartData = [
 ]
 
 const historyData = [
-  { date: '2023-06-01', event: 'Item listed' },
-  { date: '2023-06-15', event: 'Price reduced' },
-  { date: '2023-07-01', event: 'Featured in summer collection' },
+  { date: '2023-06-01', event: 'Agent created' },
+  { date: '2023-06-15', event: 'Presale Started' },
+  { date: '2023-07-01', event: 'presale finished with 1000 ETH' },
 ]
 
 const linksData = [
@@ -88,7 +88,7 @@ export default function ItemPage({ params }: { params: { id: string } }) {
               ${item.price.toFixed(4)}
             </p>
             <div className="flex space-x-4">
-              <Button className="flex-1">Add to Cart</Button>
+              <Button className="flex-1">Buy</Button>
               <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <DrawerTrigger asChild>
                   <Button variant="outline" className="flex-1">Chat</Button>
