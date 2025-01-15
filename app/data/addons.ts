@@ -5,6 +5,7 @@ export interface Addon {
   price: number;
   type: 'integration' | 'upgrade';
   icon: string;
+  billingPeriod: 'monthly';
 }
 
 export const addons: Addon[] = [
@@ -14,7 +15,8 @@ export const addons: Addon[] = [
     description: 'Connect your agent to Twitter. Post updates, engage with followers, and monitor relevant conversations.',
     price: 0.01,
     type: 'integration',
-    icon: '/placeholder.svg?height=20&width=20'
+    icon: '/placeholder.svg?height=20&width=20',
+    billingPeriod: 'monthly'
   },
   {
     id: 'discord',
@@ -22,7 +24,8 @@ export const addons: Addon[] = [
     description: 'Add your agent to Discord servers. Interact with community members and provide automated support.',
     price: 0.015,
     type: 'integration',
-    icon: '/placeholder.svg?height=20&width=20'
+    icon: '/placeholder.svg?height=20&width=20',
+    billingPeriod: 'monthly'
   },
   {
     id: 'super',
@@ -30,6 +33,7 @@ export const addons: Addon[] = [
     description: 'Upgrade to Super Agent status. Includes advanced AI capabilities, custom tools, and agent pipeline access.',
     price: 0.05,
     type: 'upgrade',
-    icon: '/placeholder.svg?height=20&width=20'
+    icon: '/placeholder.svg?height=20&width=20',
+    billingPeriod: 'monthly'
   }
 ]; 

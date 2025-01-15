@@ -293,12 +293,15 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                       </CardContent>
                       <CardFooter className="mt-auto">
                         <div className="flex items-center justify-between w-full">
-                          <p className="font-bold">{addon.price.toFixed(4)} ETH</p>
+                          <div>
+                            <p className="font-bold">{addon.price.toFixed(4)} ETH</p>
+                            <p className="text-sm text-muted-foreground">per month</p>
+                          </div>
                           <Button 
                             variant={isAlreadySuper ? "secondary" : "outline"}
                             disabled={item.status !== 'active' || item.comingSoon || isAlreadySuper}
                           >
-                            {isAlreadySuper ? 'Added' : 'Add'}
+                            {isAlreadySuper ? 'Added' : 'Subscribe'}
                           </Button>
                         </div>
                       </CardFooter>

@@ -61,7 +61,7 @@ export const items: Item[] = [
     title: 'Stormchaser',
     description: 'An air pirate who rides storm clouds. Their ship is powered by bottled lightning and crewed by wind spirits.',
     price: 0.0089,
-    image: "/placeholder.svg?height=200&width=200",
+    image: "/stormchaser.webp",
     status: 'active',
     type: 'none'
   },
