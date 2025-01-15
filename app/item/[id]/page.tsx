@@ -133,7 +133,7 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                   <Button 
                     variant="outline" 
                     className="flex-1" 
-                    disabled={item.comingSoon}
+                    disabled={item.comingSoon || item.status === 'failed'}
                   >
                     Chat
                   </Button>
@@ -155,7 +155,7 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                   <Button 
                     variant="secondary" 
                     className="flex-1"
-                    disabled={item.comingSoon}
+                    disabled={item.comingSoon || item.status === 'failed'}
                   >
                     Propose Profile Change
                   </Button>
