@@ -177,10 +177,7 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                   </Tooltip>
                   <DrawerContent>
                     <DrawerHeader>
-                      <DrawerTitle>Chat with {item.title}</DrawerTitle>
-                      <DrawerDescription>
-                        Start a conversation with this agent
-                      </DrawerDescription>
+                      <DrawerTitle>Chat about {item.title}</DrawerTitle>
                     </DrawerHeader>
                     <ChatWindow agentName={item.title} itemId={item.id} />
                     <DrawerFooter>
@@ -219,9 +216,6 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                   <DrawerContent>
                     <DrawerHeader>
                       <DrawerTitle>Propose Changes to {item.title}</DrawerTitle>
-                      <DrawerDescription>
-                        Suggest improvements or modifications to this agent's profile
-                      </DrawerDescription>
                     </DrawerHeader>
                     <div className="p-4">
                       <ChatWindow 
