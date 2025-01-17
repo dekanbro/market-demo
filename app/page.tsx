@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ItemCard } from './components/ItemCard'
 import { Marquee } from './components/Marquee'
 import { items } from './data/items'
@@ -11,16 +11,18 @@ import Link from 'next/link'
 
 export default function Home() {
   const { handleProtectedAction } = useProtectedAction();
-  const [selectedBattlers] = useState(() => {
+  const [selectedBattlers, setSelectedBattlers] = useState<typeof items>([]);
+
+  useEffect(() => {
     const featuredAgents = items.filter(item => item.status === 'featured');
-    // Shuffle array and pick first two
     const shuffled = [...featuredAgents].sort(() => Math.random() - 0.5);
-    // Ensure we don't pick the same agent twice
-    return [
+    setSelectedBattlers([
       shuffled[0],
       shuffled.find(agent => agent.id !== shuffled[0].id) || shuffled[1]
-    ];
-  });
+    ]);
+  }, []);
+
+  if (selectedBattlers.length < 2) return null;
 
   return (
     <div>
