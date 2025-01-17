@@ -3,6 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { chatStorage } from '@/app/lib/db';
 
 interface Message {
+  id: string;
   user: string;
   message: string;
   isToolResponse?: boolean;
@@ -16,7 +17,7 @@ interface ToolResponse {
   data?: any;
 }
 
-function handleToolResponse(response: ToolResponse): Message {
+function handleToolResponse(response: ToolResponse): Omit<Message, 'id'> {
   return {
     user: 'Assistant',
     message: response.message,
