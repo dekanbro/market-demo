@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { DarkModeToggle } from '@/components/dark-mode-toggle'
 import { Providers } from './components/Providers'
 import { ConnectButton } from './components/ConnectButton'
+import Image from 'next/image'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,24 +22,53 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="dark" 
+          enableSystem={false}
+          disableTransitionOnChange
+        >
           <Providers>
-            <header className="bg-background shadow-sm">
-              <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center">
-                <Link href="/" className="text-2xl font-bold text-primary mb-4 sm:mb-0">Agent Market</Link>
-                <nav className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                  <ul className="flex space-x-4">
-                    <li><Link href="/" className="text-foreground hover:text-primary transition-colors">Home</Link></li>
-                    <li><Link href="#" className="text-foreground hover:text-primary transition-colors">Categories</Link></li>
-                    <li><Link href="#" className="text-foreground hover:text-primary transition-colors">About</Link></li>
-                  </ul>
-                  <div className="flex items-center gap-2">
-                    <ConnectButton />
-                    <DarkModeToggle />
-                  </div>
-                </nav>
-              </div>
-            </header>
+            <div className="relative w-full h-[200px] md:h-[200px]">
+              <Image
+                src="/marketheader.png"
+                alt="Agent Market Banner"
+                fill
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/80" />
+              <header className="absolute top-0 w-full">
+                <div className="container mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center">
+                  <Link href="/" className="text-2xl font-bold text-primary mb-4 sm:mb-0 drop-shadow-md">
+                    Agent Market
+                  </Link>
+                  <nav className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 bg-background/95 backdrop-blur-sm px-4 py-2 rounded-full">
+                    <ul className="flex space-x-4">
+                      <li>
+                        <Link href="/" className="text-primary hover:text-primary/80 transition-colors">
+                          Home
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="#" className="text-primary hover:text-primary/80 transition-colors">
+                          Categories
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="#" className="text-primary hover:text-primary/80 transition-colors">
+                          About
+                        </Link>
+                      </li>
+                    </ul>
+                    <div className="flex items-center gap-2">
+                      <ConnectButton />
+                      <DarkModeToggle />
+                    </div>
+                  </nav>
+                </div>
+              </header>
+            </div>
             <main className="flex-grow container mx-auto px-4 py-8">
               {children}
             </main>
