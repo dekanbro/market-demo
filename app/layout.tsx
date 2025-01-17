@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import Link from 'next/link'
 import { ThemeProvider } from '@/components/theme-provider'
 import { DarkModeToggle } from '@/components/dark-mode-toggle'
-import { Providers } from './components/Providers'
+import { Providers } from '@/app/components/Providers'
 import { ConnectButton } from './components/ConnectButton'
 import Image from 'next/image'
 
@@ -43,7 +43,7 @@ export default function RootLayout({
                   <Link href="/" className="text-2xl font-bold text-primary mb-4 sm:mb-0 drop-shadow-md">
                     Agent Market
                   </Link>
-                  <nav className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 bg-background/95 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <nav className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 bg-background/95 backdrop-blur-sm px-4 py-2 w-full sm:w-auto sm:rounded-full">
                     <ul className="flex space-x-4">
                       <li>
                         <Link href="/" className="text-primary hover:text-primary/80 transition-colors">

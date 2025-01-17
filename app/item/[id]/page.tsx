@@ -5,7 +5,7 @@ import { ChatWindow } from '@/app/components/ChatWindow'
 import { Item, items } from '../../data/items'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose } from "@/components/ui/drawer"
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose, DrawerDescription } from "@/components/ui/drawer"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from 'next/image'
@@ -69,7 +69,7 @@ export default function ItemPage({ params }: { params: { id: string } }) {
   const [inputMessage, setInputMessage] = useState('')
   const { handleProtectedAction, isAuthenticated, login } = useProtectedAction()
 
-  const item = items.find((i) => i.id === parseInt(params.id))
+  const item = items.find((i) => i.id === params.id)
 
   if (!item) {
     return <div className="text-foreground">Item not found</div>
@@ -177,7 +177,10 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                   </Tooltip>
                   <DrawerContent>
                     <DrawerHeader>
-                      <DrawerTitle>Chat about {item.title}</DrawerTitle>
+                      <DrawerTitle>Chat with {item.title}</DrawerTitle>
+                      <DrawerDescription>
+                        Start a conversation with this agent
+                      </DrawerDescription>
                     </DrawerHeader>
                     <ChatWindow agentName={item.title} itemId={item.id} />
                     <DrawerFooter>
@@ -216,6 +219,9 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                   <DrawerContent>
                     <DrawerHeader>
                       <DrawerTitle>Propose Changes to {item.title}</DrawerTitle>
+                      <DrawerDescription>
+                        Suggest improvements or modifications to this agent's profile
+                      </DrawerDescription>
                     </DrawerHeader>
                     <div className="p-4">
                       <ChatWindow 
@@ -254,17 +260,29 @@ export default function ItemPage({ params }: { params: { id: string } }) {
                     color: "hsl(var(--primary))",
                   },
                 }}
-                className="h-[300px]"
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="price" stroke="var(--color-price)" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <LineChart
+                  width={800}
+                  height={300}
+                  data={chartData}
+                  margin={{
+                    top: 20,
+                    right: 30,
+                    left: 20,
+                    bottom: 20,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="price" 
+                    stroke="var(--color-price)" 
+                    strokeWidth={2} 
+                  />
+                </LineChart>
               </ChartContainer>
             </CardContent>
           </Card>

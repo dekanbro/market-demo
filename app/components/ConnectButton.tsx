@@ -1,6 +1,9 @@
 'use client'
 
 import { usePrivy } from '@privy-io/react-auth';
+import { useEffect, useState } from 'react';
+import { createPublicClient, http } from 'viem';
+import { mainnet } from 'viem/chains';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -13,9 +16,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { UserProfile } from '@/app/components/UserProfile';
+
+const publicClient = createPublicClient({
+  chain: mainnet,
+  transport: http()
+});
 
 export function ConnectButton() {
-  const { login, authenticated, ready, logout } = usePrivy();
+  const { login, authenticated, ready, logout, user } = usePrivy();
 
   if (!ready) return null;
 
@@ -30,8 +39,12 @@ export function ConnectButton() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline">
-          Connected
+        <Button variant="outline" className="gap-2">
+          <UserProfile 
+            address={user?.wallet?.address} 
+            showAvatar={true}
+            size="sm"
+          />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
