@@ -25,7 +25,7 @@ export function ChatWindow({
     ? "Greetings, seeker of creation..."
     : `Hello! I'm ${agentName}. How can I assist you today?`;
     
-  const { messages, sendMessage, isLoading } = useChat(
+  const { messages, sendMessage, isLoading, clearHistory } = useChat(
     itemId, 
     initialMessage || defaultMessage
   );
@@ -48,8 +48,16 @@ export function ChatWindow({
 
   return (
     <Card className="w-full h-[calc(100vh-10rem)] sm:h-[600px] flex flex-col">
-      <CardHeader className="p-4">
+      <CardHeader className="p-4 flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Chat with {agentName}</CardTitle>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={clearHistory}
+          disabled={messages.length === 0 || isLoading}
+        >
+          Clear History
+        </Button>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-4">
         <ScrollArea className="h-full pr-2">

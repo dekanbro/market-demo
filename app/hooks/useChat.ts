@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { chatStorage } from '@/app/lib/db';
 
 interface Message {
   user: string;
@@ -27,19 +28,38 @@ function handleToolResponse(response: ToolResponse): Message {
 
 export function useChat(itemId: string, initialMessage?: string) {
   const { getAccessToken } = usePrivy();
-  const [messages, setMessages] = useState<Message[]>(() => initialMessage ? [{
-    user: 'Assistant',
-    message: initialMessage
-  }] : []);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentToolCall, setCurrentToolCall] = useState<{
     function?: { name: string; arguments: string };
   } | null>(null);
 
+  // Load stored messages on mount
+  useEffect(() => {
+    async function loadMessages() {
+      const storedMessages = await chatStorage.getMessages(itemId);
+      if (storedMessages.length > 0) {
+        setMessages(storedMessages);
+      } else if (initialMessage) {
+        const message = await chatStorage.addMessage({
+          itemId,
+          user: 'Assistant',
+          message: initialMessage
+        });
+        setMessages([message]);
+      }
+    }
+    loadMessages();
+  }, [itemId, initialMessage]);
+
   const sendMessage = async (message: string) => {
     setIsLoading(true);
-    const newMessages = [...messages, { user: 'You', message }];
-    setMessages(newMessages);
+    const userMessage = await chatStorage.addMessage({
+      itemId,
+      user: 'You',
+      message
+    });
+    setMessages(prev => [...prev, userMessage]);
 
     try {
       const token = await getAccessToken();
@@ -54,10 +74,16 @@ export function useChat(itemId: string, initialMessage?: string) {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          messages: newMessages.map(m => ({
-            role: m.user === 'You' ? 'user' : 'assistant',
-            content: m.message
-          })), 
+          messages: [
+            ...messages.map(m => ({
+              role: m.user === 'You' ? 'user' : 'assistant',
+              content: m.message
+            })),
+            {
+              role: 'user',
+              content: message
+            }
+          ],
           itemId 
         }),
       });
@@ -67,6 +93,7 @@ export function useChat(itemId: string, initialMessage?: string) {
       const reader = response.body.getReader();
       let accumulatedMessage = '';
       let currentAssistantMessage = '';
+      let storedMessage: Message | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -78,35 +105,72 @@ export function useChat(itemId: string, initialMessage?: string) {
         try {
           const toolResponse = JSON.parse(accumulatedMessage);
           if (toolResponse?.success !== undefined) {
-            setMessages(prev => [...prev, handleToolResponse(toolResponse)]);
+            const assistantMessage = await chatStorage.addMessage({
+              itemId,
+              ...handleToolResponse(toolResponse)
+            });
+            setMessages(prev => [...prev, assistantMessage]);
             accumulatedMessage = '';
             currentAssistantMessage = '';
+            storedMessage = assistantMessage;
           }
         } catch {
           if (currentAssistantMessage !== accumulatedMessage) {
             currentAssistantMessage = accumulatedMessage;
+            if (!storedMessage) {
+              storedMessage = await chatStorage.addMessage({
+                itemId,
+                user: 'Assistant',
+                message: currentAssistantMessage,
+                isToolResponse: false,
+                status: 'success'
+              });
+            } else {
+              // Update the message in storage
+              await chatStorage.updateMessage(storedMessage.id, {
+                message: currentAssistantMessage
+              });
+              storedMessage.message = currentAssistantMessage;
+            }
             setMessages(prev => {
               const newMessages = [...prev];
               const lastMessage = newMessages[newMessages.length - 1];
               if (lastMessage?.user === 'Assistant' && !lastMessage.isToolResponse) {
                 lastMessage.message = currentAssistantMessage;
               } else {
-                newMessages.push({ user: 'Assistant', message: currentAssistantMessage });
+                newMessages.push(storedMessage!);
               }
               return newMessages;
             });
           }
         }
       }
+
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages(prev => [...prev, { 
-        user: 'Assistant', 
+      const errorMessage = await chatStorage.addMessage({
+        itemId,
+        user: 'Assistant',
         message: 'Sorry, there was an error processing your request.',
         status: 'error'
-      }]);
+      });
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const resetChat = async () => {
+    await chatStorage.clearMessages(itemId);
+    if (initialMessage) {
+      const message = await chatStorage.addMessage({
+        itemId,
+        user: 'Assistant',
+        message: initialMessage
+      });
+      setMessages([message]);
+    } else {
+      setMessages([]);
     }
   };
 
@@ -114,6 +178,6 @@ export function useChat(itemId: string, initialMessage?: string) {
     messages,
     sendMessage,
     isLoading,
-    addMessage: (message: Message) => setMessages(prev => [...prev, message])
+    clearHistory: resetChat
   };
 } 
