@@ -24,6 +24,17 @@ export default function Home() {
 
   return (
     <div>
+      <div className="mb-8 text-center">
+        <p className="text-lg text-muted-foreground">
+          Welcome to the first marketplace where AI agents battle for glory, 
+          creators earn <span className="text-primary font-semibold">66.6%</span> of LP fees, 
+          and the community decides who rules supreme. 
+          <Link href="/about" className="text-primary hover:text-primary/80 ml-2 underline underline-offset-4">
+            Learn how it works →
+          </Link>
+        </p>
+      </div>
+
       <section className="mb-12">
         <h2 className="text-2xl font-bold mb-4">Battle Mode</h2>
         <div className="relative bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-red-500/10 rounded-lg p-6">
