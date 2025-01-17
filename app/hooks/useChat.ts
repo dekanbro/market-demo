@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { usePrivy } from '@privy-io/react-auth'
 
 interface Message {
   id: string;
@@ -12,6 +13,7 @@ interface UseChatOptions {
 }
 
 export function useChat({ initialMessages = [], itemId }: UseChatOptions) {
+  const { getAccessToken } = usePrivy()
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -41,9 +43,17 @@ export function useChat({ initialMessages = [], itemId }: UseChatOptions) {
       abortControllerRef.current = new AbortController();
 
       try {
+        const token = await getAccessToken()
+        if (!token) {
+          throw new Error('Not authenticated')
+        }
+
         const response = await fetch('/api/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({ 
             messages: [...messages, userMessage],
             itemId: itemId
@@ -78,7 +88,7 @@ export function useChat({ initialMessages = [], itemId }: UseChatOptions) {
         setIsLoading(false);
       }
     },
-    [input, messages, isLoading, itemId]
+    [input, messages, isLoading, itemId, getAccessToken]
   );
 
   return {

@@ -10,10 +10,17 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, Drawer
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from 'next/image'
 import Link from 'next/link'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Badge } from "@/components/ui/badge"
 import { addons } from '@/app/data/addons'
+import { useProtectedAction } from '@/app/hooks/useProtectedAction'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const chartData = [
   { name: 'Jan', price: 100 },
@@ -60,6 +67,7 @@ export default function ItemPage({ params }: { params: { id: string } }) {
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false)
   const [chatMessages, setChatMessages] = useState<{ user: string; message: string }[]>([])
   const [inputMessage, setInputMessage] = useState('')
+  const { handleProtectedAction, isAuthenticated, login } = useProtectedAction()
 
   const item = items.find((i) => i.id === parseInt(params.id))
 
@@ -122,62 +130,108 @@ export default function ItemPage({ params }: { params: { id: string } }) {
               ${item.price.toFixed(4)}
             </p>
             <div className="flex space-x-4">
-              <Button 
-                className="flex-1" 
-                disabled={item.status !== 'active' || item.comingSoon}
-              >
-                Buy
-              </Button>
-              <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                <DrawerTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="flex-1" 
-                    disabled={item.comingSoon || item.status === 'failed'}
-                  >
-                    Chat
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader>
-                    <DrawerTitle>Chat about {item.title}</DrawerTitle>
-                  </DrawerHeader>
-                  <ChatWindow agentName={item.title} itemId={item.id} />
-                  <DrawerFooter>
-                    <DrawerClose asChild>
-                      <Button variant="outline">Close</Button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
-              <Drawer open={isProfileDrawerOpen} onOpenChange={setIsProfileDrawerOpen}>
-                <DrawerTrigger asChild>
-                  <Button 
-                    variant="secondary" 
-                    className="flex-1"
-                    disabled={item.comingSoon || item.status === 'failed'}
-                  >
-                    Propose Profile Change
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader>
-                    <DrawerTitle>Propose Changes to {item.title}</DrawerTitle>
-                  </DrawerHeader>
-                  <div className="p-4">
-                    <ChatWindow 
-                      agentName={item.title} 
-                      itemId={item.id} 
-                      initialMessage="I'm ready to hear your suggestions for improving my profile. What changes would you propose?"
-                    />
-                  </div>
-                  <DrawerFooter>
-                    <DrawerClose asChild>
-                      <Button variant="outline">Close</Button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      className="flex-1" 
+                      disabled={item.status !== 'active' || item.comingSoon}
+                      onClick={() => handleProtectedAction(() => {
+                        console.log('Buy clicked');
+                      })}
+                    >
+                      Buy
+                    </Button>
+                  </TooltipTrigger>
+                  {!isAuthenticated && (
+                    <TooltipContent>
+                      <p>Connect wallet to buy</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+
+                <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DrawerTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="flex-1" 
+                          disabled={item.comingSoon || item.status === 'failed'}
+                          onClick={(e) => {
+                            if (!isAuthenticated) {
+                              e.preventDefault();
+                              login();
+                            }
+                          }}
+                        >
+                          Chat
+                        </Button>
+                      </DrawerTrigger>
+                    </TooltipTrigger>
+                    {!isAuthenticated && (
+                      <TooltipContent>
+                        <p>Connect wallet to chat</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                  <DrawerContent>
+                    <DrawerHeader>
+                      <DrawerTitle>Chat about {item.title}</DrawerTitle>
+                    </DrawerHeader>
+                    <ChatWindow agentName={item.title} itemId={item.id} />
+                    <DrawerFooter>
+                      <DrawerClose asChild>
+                        <Button variant="outline">Close</Button>
+                      </DrawerClose>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
+
+                <Drawer open={isProfileDrawerOpen} onOpenChange={setIsProfileDrawerOpen}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DrawerTrigger asChild>
+                        <Button 
+                          variant="secondary" 
+                          className="flex-1"
+                          disabled={item.comingSoon || item.status === 'failed'}
+                          onClick={(e) => {
+                            if (!isAuthenticated) {
+                              e.preventDefault();
+                              login();
+                            }
+                          }}
+                        >
+                          Propose Agent Changes
+                        </Button>
+                      </DrawerTrigger>
+                    </TooltipTrigger>
+                    {!isAuthenticated && (
+                      <TooltipContent>
+                        <p>Connect wallet to propose agent changes</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                  <DrawerContent>
+                    <DrawerHeader>
+                      <DrawerTitle>Propose Changes to {item.title}</DrawerTitle>
+                    </DrawerHeader>
+                    <div className="p-4">
+                      <ChatWindow 
+                        agentName={item.title} 
+                        itemId={item.id} 
+                        initialMessage="I'm ready to hear your suggestions for improving my profile. What changes would you propose?"
+                      />
+                    </div>
+                    <DrawerFooter>
+                      <DrawerClose asChild>
+                        <Button variant="outline">Close</Button>
+                      </DrawerClose>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
+              </TooltipProvider>
             </div>
           </div>
         </div>
