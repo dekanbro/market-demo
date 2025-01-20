@@ -1,7 +1,7 @@
 import { getGraphClient } from './graphql'
 import { gql } from 'graphql-request'
-import { DaoQueryResponse, DaoResponse } from './types'
-import { CHAIN_ID, GRAPH } from './constants'
+import { DaoItem, DaoQueryResponse, DaoResponse } from './types'
+import { CHAIN_ID, DEFAULT_DAO_DATE, GRAPH } from './constants'
 
 // GraphQL Fragments
 const daoFields = gql`
@@ -120,6 +120,60 @@ const queries = {
       }
     }
     ${daoFields}
+  `,
+
+  getCombinedDaos: gql`
+    query getCombinedDaos(
+      $ids: [ID!]
+      $skip: Int = 0
+      $first: Int = 100
+      $orderBy: String = "createdAt"
+      $orderDirection: String = "desc"
+      $createdAfter: String
+      $referrer: String
+    ) {
+      specificDaos: daos(where: { id_in: $ids }) {
+        ...DaoFields
+      }
+      filteredDaos: daos(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: {
+          createdAt_gt: $createdAfter
+          referrer: $referrer
+        }
+      ) {
+        ...DaoFields
+      }
+    }
+    ${daoFields}
+  `,
+
+  getFeaturedAndRecentDaos: gql`
+    query getFeaturedAndRecentDaos(
+      $ids: [ID!]!
+      $skip: Int = 0
+      $first: Int = 100
+      $orderBy: String = "createdAt"
+      $orderDirection: String = "desc"
+      $createdAfter: String
+    ) {
+      featured: daos(where: { id_in: $ids }) {
+        ...DaoFields
+      }
+      recent: daos(
+        where: { createdAt_gt: $createdAfter }
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+      ) {
+        ...DaoFields
+      }
+    }
+    ${daoFields}
   `
 }
 
@@ -157,6 +211,10 @@ interface FilteredDaoParams extends DaoQueryParams {
   referrer?: string;
 }
 
+interface CombinedDaoParams extends FilteredDaoParams {
+  ids?: string[];
+}
+
 export async function fetchDaos({ 
   chainId = CHAIN_ID.BASE, 
   filter 
@@ -191,18 +249,36 @@ export async function fetchDaos({
   }
 }
 
-export async function fetchDaosByIds(ids: string[]): Promise<DaoResponse> {
+export async function fetchDaosByIds({ 
+  chainId = CHAIN_ID.BASE,
+  filter,
+  ids = []
+}: DaoQueryParams & { ids: string[] }): Promise<DaoResponse> {
   try {
-    console.log("[DAO] Fetching DAOs by IDs:", ids)
+    const client = createGraphClient(chainId)
     
-    const client = createGraphClient()
-    logRequest({ ids })
-    
-    const data = await client.request<DaoQueryResponse>(queries.getDaosByIds, { ids })
-    console.log("[DAO] Response:", data)
-    
+    const data = await client.request<DaoQueryResponse>(
+      queries.getDaosByIds, 
+      { ids }
+    )
+
+    // Apply filters in memory
+    let filteredDaos = data.daos
+
+    // Apply text filter if provided
+    if (filter) {
+      filteredDaos = filteredDaos.filter(dao => 
+        dao.name.toLowerCase().includes(filter.toLowerCase())
+      )
+    }
+
+    // Sort by createdAt descending
+    const sortedDaos = filteredDaos.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+
     return {
-      daos: data.daos,
+      daos: sortedDaos,
       error: null,
       loading: false
     }
@@ -250,6 +326,121 @@ export async function fetchFilteredDaos({
 
     return {
       daos: filteredDaos,
+      error: null,
+      loading: false
+    }
+  } catch (error) {
+    console.error("[DAO] Error:", error)
+    return {
+      daos: [],
+      error: error instanceof Error ? error.message : 'Failed to fetch DAOs',
+      loading: false
+    }
+  }
+}
+
+export async function fetchCombinedDaos({ 
+  chainId = CHAIN_ID.BASE,
+  filter,
+  createdAfter,
+  referrer,
+  ids = []
+}: CombinedDaoParams = {}): Promise<DaoResponse> {
+  try {
+    const client = createGraphClient(chainId)
+    
+    // Build where clause based on provided values
+    const where: Record<string, any> = {}
+    if (createdAfter) where.createdAt_gt = createdAfter
+    if (referrer) where.referrer = referrer
+
+    const variables = {
+      ids: ids.length > 0 ? ids : undefined,
+      where
+    }
+    
+    const data = await client.request<{
+      specificDaos: DaoItem[];
+      filteredDaos: DaoItem[];
+    }>(queries.getCombinedDaos, variables)
+
+    // Apply text filter after fetching if needed
+    let allDaos = [...data.specificDaos, ...data.filteredDaos]
+    if (filter) {
+      allDaos = allDaos.filter(dao => 
+        dao.name.toLowerCase().includes(filter.toLowerCase())
+      )
+    }
+
+    // Remove duplicates and sort
+    const uniqueDaos = Array.from(
+      new Map(allDaos.map(dao => [dao.id, dao])).values()
+    )
+
+    const sortedDaos = uniqueDaos.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+
+    return {
+      daos: sortedDaos,
+      error: null,
+      loading: false
+    }
+  } catch (error) {
+    console.error("[DAO] Error:", error)
+    return {
+      daos: [],
+      error: error instanceof Error ? error.message : 'Failed to fetch DAOs',
+      loading: false
+    }
+  }
+}
+
+export async function fetchFeaturedAndRecentDaos({ 
+  chainId = CHAIN_ID.BASE,
+  filter,
+  featuredIds = [],
+  first = 100,
+  createdAfter = DEFAULT_DAO_DATE
+}: DaoQueryParams & { 
+  featuredIds: string[];
+  first?: number;
+  createdAfter?: string;
+}): Promise<DaoResponse> {
+  try {
+    const client = createGraphClient(chainId)
+    
+    const data = await client.request<{
+      featured: DaoItem[];
+      recent: DaoItem[];
+    }>(queries.getFeaturedAndRecentDaos, { 
+      ids: featuredIds,
+      first,
+      createdAfter
+    })
+
+    // Combine both sets
+    let allDaos = [...data.featured, ...data.recent]
+
+    // Apply text filter if provided
+    if (filter) {
+      allDaos = allDaos.filter(dao => 
+        dao.name.toLowerCase().includes(filter.toLowerCase())
+      )
+    }
+
+    // Remove duplicates
+    const uniqueDaos = Array.from(
+      new Map(allDaos.map(dao => [dao.id, dao])).values()
+    )
+
+    // Sort by createdAt descending
+    const sortedDaos = uniqueDaos.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+
+    return {
+      daos: sortedDaos,
       error: null,
       loading: false
     }

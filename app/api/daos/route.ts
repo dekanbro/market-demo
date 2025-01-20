@@ -1,15 +1,24 @@
 import { NextResponse } from 'next/server'
-import { fetchDaos } from '@/app/lib/dao-service'
+import { fetchFeaturedAndRecentDaos } from '@/app/lib/dao-service'
+import { FEATURED_DAOS, DEFAULT_DAO_DATE } from '@/app/lib/constants'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const chainId = searchParams.get('chainId') || '0x5'
-    const filter = searchParams.get('filter') || ''
+    const chainId = searchParams.get('chainId') || undefined
+    const filter = searchParams.get('filter') || undefined
+    const first = searchParams.get('first') ? parseInt(searchParams.get('first')!) : 100
+    const createdAfter = searchParams.get('createdAfter') || DEFAULT_DAO_DATE
 
-    const response = await fetchDaos({ chainId, filter })
+    const response = await fetchFeaturedAndRecentDaos({ 
+      chainId,
+      filter,
+      featuredIds: FEATURED_DAOS.map(dao => dao.id),
+      first,
+      createdAfter
+    })
     
     return new NextResponse(JSON.stringify(response), {
       status: 200,

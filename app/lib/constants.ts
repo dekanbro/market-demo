@@ -41,3 +41,8 @@ export const FEATURED_DAOS = [
     id: '0xc08ee7e26620da30e04ee85f23e00be189d4e2ec', // FLY
   },
 ] as const
+
+// Convert date to Unix timestamp (seconds since epoch)
+export const DEFAULT_DAO_DATE = Math.floor(new Date('2024-12-01').getTime() / 1000).toString()
+
+export const REFERRER = "DHYeet24ShamanSummoner.5"; 
