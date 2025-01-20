@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server'
-import { items } from '@/app/data/items'
-
-export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  console.log("fetching daos")
   return new NextResponse(JSON.stringify({
-    items: items
+    message: "Hello World"
   }), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
     }
   })
-} 
+}

@@ -7,9 +7,36 @@ const privy = new PrivyClient(
   process.env.PRIVY_APP_SECRET!
 )
 
+// Define public routes that don't need authentication
+const PUBLIC_ROUTES = [
+  '/api/daos',
+  '/api/items',
+  '/api/items/:id'  // Using path pattern
+]
+
+// Helper to check if route is public
+function isPublicRoute(pathname: string) {
+  return PUBLIC_ROUTES.some(route => {
+    // Handle routes with parameters
+    if (route.includes(':')) {
+      const routePattern = route.replace(/:[\w-]+/g, '[\\w-]+')
+      const regex = new RegExp(`^${routePattern}$`)
+      return regex.test(pathname)
+    }
+    return route === pathname
+  })
+}
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Allow public routes without authentication
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next()
+  }
+
   // Only protect /api routes
-  if (!request.nextUrl.pathname.startsWith('/api')) {
+  if (!pathname.startsWith('/api')) {
     return NextResponse.next()
   }
 
@@ -18,10 +45,9 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
-  const token = authHeader.split(' ')[1]
   try {
+    const token = authHeader.split(' ')[1]
     const { userId } = await privy.verifyAuthToken(token)
-    // Add the verified user ID to the request headers
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-privy-user', userId)
 
