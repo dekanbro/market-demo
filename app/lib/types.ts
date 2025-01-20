@@ -74,7 +74,7 @@ export interface VaultItem {
 }
 
 export interface DaoQueryResponse {
-  molochV3S: DaoItem[];
+  daos: DaoItem[];
 }
 
 export interface DaoResponse {

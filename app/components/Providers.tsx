@@ -1,19 +1,20 @@
 'use client'
 
-import { createConfig, type Config } from '@wagmi/core'
+import { createConfig } from '@wagmi/core'
 import { WagmiProvider } from 'wagmi'
-import { mainnet } from 'viem/chains';
-import { http } from 'viem';
+import { base } from 'viem/chains'
+import { http } from 'viem'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { PrivyProvider } from '@privy-io/react-auth';
+import { PrivyProvider } from '@privy-io/react-auth'
+import { DEFAULT_CHAIN } from '@/app/lib/constants'
 
-// Simple config for ENS resolution only
+// Configure for Base
 const config = createConfig({
-  chains: [mainnet],
+  chains: [base],
   transports: {
-    [mainnet.id]: http()
+    [base.id]: http()
   }
-}) satisfies Config
+})
 
 const queryClient = new QueryClient()
 
@@ -27,6 +28,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
           theme: 'dark',
           accentColor: '#676FFF',
         },
+        defaultChain: base,
+        supportedChains: [base]
       }}
     >
       <WagmiProvider config={config}>
@@ -35,5 +38,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </QueryClientProvider>
       </WagmiProvider>
     </PrivyProvider>
-  );
+  )
 } 
