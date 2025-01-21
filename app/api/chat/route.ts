@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { getDaoById } from '@/app/lib/dao-service';
 import { executeFunctionCall } from './functions';
-import { agentRegistry } from './agent-registry'
+import { agentRegistry } from './agent-registry';
 
 export const runtime = 'edge';
 
@@ -10,40 +10,44 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
-  const { messages, itemId: daoId } = await req.json();
-  
-  // Fetch DAO data using the existing GraphQL query
-  const dao = await getDaoById(daoId);
+  const { messages, itemId } = await req.json();
 
-  if (!dao) {
-    return new Response('DAO not found', { status: 404 });
+  let systemPrompt: string;
+  let tools = [];
+
+  if (itemId === 'help-agent-0x1') {
+    const agentConfig = agentRegistry['help'];
+    systemPrompt = await agentConfig.systemPrompt();
+    tools = agentConfig.tools;
+  } else {
+    const dao = await getDaoById(itemId);
+    if (!dao) {
+      return new Response(JSON.stringify({ error: 'DAO not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    const agentConfig = agentRegistry[dao.type as keyof typeof agentRegistry] || agentRegistry['default'];
+    systemPrompt = await agentConfig.systemPrompt(dao);
+    tools = agentConfig.tools;
   }
 
-  // Get agent configuration based on DAO type
-  // const agentConfig = agentRegistry[dao.type as keyof typeof agentRegistry] || agentRegistry.default;
-  const agentConfig = agentRegistry.default;
-
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    stream: true,
+  const stream = await openai.chat.completions.create({
+    model: 'gpt-4-turbo-preview',
     messages: [
-      { 
-        role: "system", 
-        content: agentConfig.systemPrompt(dao)
-      }, 
-      ...messages
+      { role: 'system', content: systemPrompt },
+      ...messages,
     ],
-    tools: agentConfig.tools,
-    tool_choice: "auto",
+    stream: true,
+    tools,
   });
 
-  const stream = new ReadableStream({
+  const streamResult = new ReadableStream({
     async start(controller) {
       let currentToolCall: any = null;
       let processedCalls = new Set();
 
-      for await (const chunk of response) {
+      for await (const chunk of stream) {
         if (chunk.choices[0]?.delta?.tool_calls) {
           const toolCallDelta = chunk.choices[0].delta.tool_calls[0];
           
@@ -73,9 +77,7 @@ export async function POST(req: Request) {
                   currentToolCall.function.name,
                   args
                 );
-                controller.enqueue(new TextEncoder().encode(
-                  `\n<tool-call>\n\`\`\`${currentToolCall.id}\n${result}\n\`\`\`\n</tool-call>\n`
-                ));
+                controller.enqueue(new TextEncoder().encode(result));
                 processedCalls.add(callId);
               } catch (error) {
                 if (error instanceof SyntaxError) {
@@ -94,7 +96,7 @@ export async function POST(req: Request) {
     },
   });
 
-  return new Response(stream, {
+  return new Response(streamResult, {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',

@@ -6,6 +6,7 @@ import { useProtectedAction } from '@/app/hooks/useProtectedAction'
 
 export function DaoActions({ dao }: { dao: HydratedDaoItem }) {
   const { handleProtectedAction } = useProtectedAction()
+  
 
   return (
     <div className="flex gap-4">

@@ -17,10 +17,10 @@ export function DaoDetails({ id }: { id: string }) {
   useEffect(() => {
     async function fetchDao() {
       try {
-        const res = await fetch(`/api/daos?ids=${id}`)
+        const res = await fetch(`/api/dao/${id}`)
         if (!res.ok) throw new Error('Failed to fetch DAO')
         const data = await res.json()
-        setDao(data.daos[0])
+        setDao(data)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to fetch DAO')
       } finally {

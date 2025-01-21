@@ -10,6 +10,8 @@ const privy = new PrivyClient(
 // Define public routes that don't need authentication
 const PUBLIC_ROUTES = [
   '/api/daos',  
+  '/api/about',
+  '/api/dao/:id'
 ]
 
 // Helper to check if route is public

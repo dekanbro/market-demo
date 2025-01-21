@@ -179,7 +179,7 @@ const queries = {
 
   getDaoById: gql`
     query getDaoById($id: ID!) {
-      daos(where: { id: $id }, first: 1) {
+      dao(id: $id) {
         ...DaoFields
       }
     }
@@ -503,19 +503,20 @@ export async function fetchFeaturedAndRecentDaos({
 }
 
 export async function getDaoById(id: string, chainId = CHAIN_ID.BASE): Promise<HydratedDaoItem | null> {
+  console.log("[DAO] Fetching DAO by ID:", id)
   try {
     const client = createGraphClient(chainId)
     logRequest({ chainId, id })
     
-    const data = await client.request<{ daos: DaoItem[] }>(
+    const data = await client.request<{ dao: DaoItem }>(
       queries.getDaoById,
       { id }
     )
 
-    if (!data.daos?.[0]) return null
+    if (!data.dao) return null
 
     // Hydrate the DAO data
-    const hydratedDao = hydrateDaoData(data.daos[0])
+    const hydratedDao = hydrateDaoData(data.dao)
     
     return hydratedDao
   } catch (error) {

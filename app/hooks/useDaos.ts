@@ -69,7 +69,9 @@ export function useDaoById(id?: string) {
     async function fetchDao() {
       setLoading(true)
       try {
-        const dao = await getDaoById(id as string)  // Type assertion since we've checked id exists
+        const response = await fetch(`/api/dao/${id}`)
+        if (!response.ok) throw new Error('Failed to fetch DAO')
+        const dao = await response.json()
         setDao(dao)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to fetch DAO')

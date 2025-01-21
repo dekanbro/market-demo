@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button'
 import { DaoChatDrawer } from './DaoChatDrawer'
 import Image from 'next/image'
 import { useState } from 'react'
+import { useProtectedAction } from '@/app/hooks/useProtectedAction'
 
 export function DaoImage({ dao }: { dao: HydratedDaoItem }) {
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const { handleProtectedAction } = useProtectedAction()
 
   return (
     <>
@@ -25,7 +27,9 @@ export function DaoImage({ dao }: { dao: HydratedDaoItem }) {
             variant="outline" 
             size="lg" 
             className="flex-1"
-            onClick={() => setIsChatOpen(true)}
+            onClick={() => handleProtectedAction(() => {
+              setIsChatOpen(true)
+            })}
           >
             Chat with DAO
           </Button>

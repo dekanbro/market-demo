@@ -86,9 +86,31 @@ const config: Config = {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+  		typography: {
+  			DEFAULT: {
+  				css: {
+  					maxWidth: 'none',
+  					color: 'inherit',
+  					a: {
+  						color: 'inherit',
+  						textDecoration: 'underline',
+  						fontWeight: '500',
+  					},
+  					code: {
+  						color: 'inherit',
+  						background: 'hsl(var(--muted))',
+  						padding: '0.2em 0.4em',
+  						borderRadius: '3px',
+  					},
+  				},
+  			},
+  		},
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require('@tailwindcss/typography'),
+  ],
 };
 export default config;

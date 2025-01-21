@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
 
 export function ChatWindow({ 
   agentName, 
@@ -86,7 +87,9 @@ export function ChatWindow({
                     "rounded-lg px-3 py-2 text-sm sm:text-base",
                     message.user === 'You' ? "bg-primary text-primary-foreground" : getMessageStyles(message.message)
                   )}>
-                    <p className="break-words">{message.message.replace(/<\/?tool-call>/g, '')}</p>
+                    <ReactMarkdown className="prose dark:prose-invert prose-sm">
+                      {message.message.replace(/<\/?tool-call>/g, '')}
+                    </ReactMarkdown>
                     {message.data && (
                       <p className="text-xs mt-1 opacity-70 break-all">
                         {JSON.stringify(message.data)}

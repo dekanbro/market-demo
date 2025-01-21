@@ -1,14 +1,8 @@
 'use client'
 
-import { usePrivy } from '@privy-io/react-auth'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useRouter } from 'next/navigation'
-import { useDaos } from '@/app/hooks/useDaos'
-import { DEFAULT_CHAIN } from '@/app/lib/constants'
-import { useWallets } from '@privy-io/react-auth'
-import { DaoCard } from './DaoCard'
+
 import { useEnsProfile, truncateAddress } from '@/app/hooks/useEnsProfile'
 import { useDaoById } from '@/app/hooks/useDaos'
 

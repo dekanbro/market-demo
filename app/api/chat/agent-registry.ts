@@ -1,5 +1,6 @@
 import { HydratedDaoItem } from '@/app/lib/types'
 import { getDaoById } from '@/app/lib/dao-service'
+import { docs } from '@/app/about/content/docs'
 
 // Define function types for each agent type
 interface BaseAgentFunctions {
@@ -109,6 +110,38 @@ export const agentRegistry = {
     functions: {
       // Implement Blacksmith-specific functions
     } as BlacksmithFunctions
+  },
+  'help': {
+    tools: baseFunctionTools,
+    systemPrompt: async () => {
+      try {
+        const response = await fetch('/api/about')
+        const { docs } = await response.json()
+        
+        return `
+          You are the Help Agent, an expert on the Agent Market platform.
+          
+          Use this documentation to answer questions accurately:
+
+          ${Object.values(docs).join('\n\n')}
+          
+          When answering:
+          1. Be friendly and informative
+          2. Use simple language to explain complex concepts
+          3. Give specific examples when possible
+          4. Reference specific sections from the documentation
+          5. Stay within the scope of the provided documentation
+          
+          If you don't know something or it's not in the documentation, say so clearly.
+        `
+      } catch (error) {
+        console.error('Failed to fetch help content:', error)
+        return 'You are the Help Agent, but currently have limited access to documentation. Please try again later.'
+      }
+    },
+    functions: {
+      // Help agent can use base functions
+    } as BaseAgentFunctions
   },
   'default': {
     tools: baseFunctionTools,
