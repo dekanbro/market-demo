@@ -50,4 +50,10 @@ export const SUPER_AGENTS = [
 // Convert date to Unix timestamp (seconds since epoch)
 export const DEFAULT_DAO_DATE = Math.floor(new Date('2025-01-01').getTime() / 1000).toString()
 
-export const REFERRER = "DHYeet24ShamanSummoner.5"; 
+export const REFERRER = "DHYeet24ShamanSummoner.5";
+
+// Add these to your existing constants
+export const AGENT_IDS = {
+  HELP: 'help-agent-0x1',
+  SUMMONER: 'summoner-agent-0x1',
+} as const 

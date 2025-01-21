@@ -1,6 +1,7 @@
 import { HydratedDaoItem } from '@/app/lib/types'
 import { getDaoById } from '@/app/lib/dao-service'
 import { docs } from '@/app/about/content/docs'
+import { AGENT_IDS } from '@/app/lib/constants'
 
 // Define function types for each agent type
 interface BaseAgentFunctions {
@@ -19,6 +20,13 @@ interface SummonerFunctions extends BaseAgentFunctions {
 
 interface BlacksmithFunctions extends BaseAgentFunctions {
   forgeMetal: (args: { type: string, quantity: number }) => Promise<string>
+}
+
+// At the top of the file, add an interface for agent config
+interface AgentConfig {
+  tools: any[];
+  systemPrompt: (dao?: HydratedDaoItem) => string | Promise<string>;
+  functions: BaseAgentFunctions | SummonerFunctions | BlacksmithFunctions;
 }
 
 // Define tool schemas for each function
@@ -85,33 +93,8 @@ const summonerTools = [
 ]
 
 // Registry mapping DAO types to their functions and tools
-export const agentRegistry = {
-  'summoner': {
-    tools: summonerTools,
-    systemPrompt: (dao: HydratedDaoItem) => `
-      You are the Summoner, a special agent that helps create new DAOs.
-      Guide users through the creation process by asking for:
-      1. Token Symbol (3-4 characters)
-      2. DAO Name (memorable)
-      3. Description (compelling)
-      4. Initial Price (0.0001-0.1 ETH)
-      
-      Ask for these one at a time and provide feedback.
-    `,
-    functions: {
-      // Implement Summoner-specific functions
-    } as SummonerFunctions
-  },
-  'blacksmith': {
-    tools: [...baseFunctionTools], // Add blacksmith-specific tools
-    systemPrompt: (dao: HydratedDaoItem) => `
-      You are the Iron Blacksmith...
-    `,
-    functions: {
-      // Implement Blacksmith-specific functions
-    } as BlacksmithFunctions
-  },
-  'help': {
+export const agentRegistry: Record<string, AgentConfig> = {
+  [AGENT_IDS.HELP]: {
     tools: baseFunctionTools,
     systemPrompt: async () => {
       try {
@@ -140,8 +123,47 @@ export const agentRegistry = {
       }
     },
     functions: {
-      // Help agent can use base functions
+      // Help agent functions
     } as BaseAgentFunctions
+  },
+  [AGENT_IDS.SUMMONER]: {
+    tools: summonerTools,
+    systemPrompt: async (_dao?: HydratedDaoItem) => `
+      You are the Summoner Agent, an expert in creating DAOs on Agent Market.
+      
+      Your role is to:
+      1. Guide users through the DAO creation process
+      2. Explain the different options and parameters
+      3. Help users make informed decisions about their DAO setup
+      4. Execute the DAO creation when ready
+
+      When helping users create a DAO:
+      - Ask for the DAO name and symbol
+      - Help them craft a good description
+      - Explain governance options
+      - Guide them on token setup
+      - Assist with any questions about the process
+
+      Use the createDao function when the user is ready to create their DAO.
+      Always confirm the details before proceeding with creation.
+
+      Be friendly but professional. Focus on helping users make good decisions.
+    `,
+    functions: {
+      createDao: async ({ name, symbol, description, price }) => {
+        console.log('Creating DAO:', { name, symbol, description, price })
+        return `DAO creation initiated with name: ${name}`
+      }
+    } as SummonerFunctions
+  },
+  'blacksmith': {
+    tools: [...baseFunctionTools], // Add blacksmith-specific tools
+    systemPrompt: (dao: HydratedDaoItem) => `
+      You are the Iron Blacksmith...
+    `,
+    functions: {
+      // Implement Blacksmith-specific functions
+    } as BlacksmithFunctions
   },
   'default': {
     tools: baseFunctionTools,

@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { getDaoById } from '@/app/lib/dao-service';
 import { executeFunctionCall } from './functions';
 import { agentRegistry } from './agent-registry';
+import { AGENT_IDS } from '@/app/lib/constants'
 
 export const runtime = 'edge';
 
@@ -15,8 +16,8 @@ export async function POST(req: Request) {
   let systemPrompt: string;
   let tools = [];
 
-  if (itemId === 'help-agent-0x1') {
-    const agentConfig = agentRegistry['help'];
+  if (itemId === AGENT_IDS.HELP || itemId === AGENT_IDS.SUMMONER) {
+    const agentConfig = agentRegistry[itemId as keyof typeof agentRegistry];
     systemPrompt = await agentConfig.systemPrompt();
     tools = agentConfig.tools;
   } else {

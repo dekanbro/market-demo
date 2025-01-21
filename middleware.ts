@@ -11,6 +11,7 @@ const privy = new PrivyClient(
 const PUBLIC_ROUTES = [
   '/api/daos',  
   '/api/about',
+  '/api/create',
   '/api/dao/:id'
 ]
 
