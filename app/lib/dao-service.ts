@@ -189,7 +189,7 @@ const queries = {
 
 // Helper Functions
 function createGraphClient(chainId: string = CHAIN_ID.BASE) {
-  const apiKey = process.env.NEXT_PUBLIC_GRAPH_API_KEY
+  const apiKey = process.env.GRAPH_API_KEY
   if (!apiKey) {
     throw new Error('Graph API key is not configured')
   }
@@ -202,7 +202,7 @@ function createGraphClient(chainId: string = CHAIN_ID.BASE) {
 }
 
 function logRequest(params: Record<string, any>) {
-  const apiKey = process.env.NEXT_PUBLIC_GRAPH_API_KEY
+  const apiKey = process.env.GRAPH_API_KEY
   console.log("[DAO] Making request with:", {
     ...params,
     graphKey: apiKey?.substring(0, 8) + '...',
