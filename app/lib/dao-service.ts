@@ -1,7 +1,8 @@
 import { getGraphClient } from './graphql'
 import { gql } from 'graphql-request'
 import { DaoItem, DaoQueryResponse, DaoResponse, DaoStatus, DaoType, HydratedDaoItem } from './types'
-import { CHAIN_ID, DEFAULT_DAO_DATE, GRAPH, FEATURED_DAOS } from './constants'
+import { CHAIN_ID, DEFAULT_DAO_DATE, GRAPH, FEATURED_DAOS, SUPER_AGENTS } from './constants'
+
 
 // GraphQL Fragments
 const daoFields = gql`
@@ -174,6 +175,15 @@ const queries = {
       }
     }
     ${daoFields}
+  `,
+
+  getDaoById: gql`
+    query getDaoById($id: ID!) {
+      daos(where: { id: $id }, first: 1) {
+        ...DaoFields
+      }
+    }
+    ${daoFields}
   `
 }
 
@@ -219,6 +229,7 @@ interface CombinedDaoParams extends FilteredDaoParams {
 function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
   // Check if DAO is featured
   const isFeatured = FEATURED_DAOS.some(featured => featured.id === dao.id)
+  const isSuperAgent = SUPER_AGENTS.some(agent => agent.id === dao.id)
   
   // Parse profile data
   let profile = undefined
@@ -235,6 +246,9 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
   if (isFeatured) status = 'featured'
   // else if (dao.activeMemberCount > 0) status = 'active'
 
+  let type: DaoType = 'none'
+  if (isSuperAgent) type = 'super'
+
   console.log("[DAO] Hydrating DAO:", dao.id, status)
   console.log("[DAO] DAO:", dao.rawProfile)
 
@@ -243,7 +257,7 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     profile,
     status,
     comingSoon: false,
-    type: 'none',
+    type,
     price: 0
   }
 }
@@ -485,5 +499,27 @@ export async function fetchFeaturedAndRecentDaos({
       error: error instanceof Error ? error.message : 'Failed to fetch DAOs',
       loading: false
     }
+  }
+}
+
+export async function getDaoById(id: string, chainId = CHAIN_ID.BASE): Promise<HydratedDaoItem | null> {
+  try {
+    const client = createGraphClient(chainId)
+    logRequest({ chainId, id })
+    
+    const data = await client.request<{ daos: DaoItem[] }>(
+      queries.getDaoById,
+      { id }
+    )
+
+    if (!data.daos?.[0]) return null
+
+    // Hydrate the DAO data
+    const hydratedDao = hydrateDaoData(data.daos[0])
+    
+    return hydratedDao
+  } catch (error) {
+    console.error("[DAO] Error fetching DAO:", error)
+    return null
   }
 } 

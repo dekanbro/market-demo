@@ -25,7 +25,6 @@ export const GRAPH = {
 // API Routes
 export const API_ROUTES = {
   DAOS: '/api/daos',
-  ITEMS: '/api/items',
   CHAT: '/api/chat',
 } as const 
 
@@ -39,6 +38,12 @@ export const FEATURED_DAOS = [
   },
   {
     id: '0xc08ee7e26620da30e04ee85f23e00be189d4e2ec', // FLY
+  },
+] as const
+
+export const SUPER_AGENTS = [
+  {
+    id: '0x0d8d4d5de4ea1ed04bfd94375a8f34078194ff61', // Super Agent
   },
 ] as const
 

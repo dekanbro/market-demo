@@ -1,14 +1,24 @@
-import { useEnsProfile, truncateAddress } from '@/app/hooks/useEnsProfile';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { items } from '@/app/data/items';
+'use client'
+
+import { usePrivy } from '@privy-io/react-auth'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useRouter } from 'next/navigation'
+import { useDaos } from '@/app/hooks/useDaos'
+import { DEFAULT_CHAIN } from '@/app/lib/constants'
+import { useWallets } from '@privy-io/react-auth'
+import { DaoCard } from './DaoCard'
+import { useEnsProfile, truncateAddress } from '@/app/hooks/useEnsProfile'
+import { useDaoById } from '@/app/hooks/useDaos'
 
 interface UserProfileProps {
-  address?: string;
-  showAvatar?: boolean;
-  showName?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  isAgent?: boolean;
-  agentName?: string;
+  address?: string
+  showAvatar?: boolean
+  showName?: boolean
+  size?: 'sm' | 'md' | 'lg'
+  isAgent?: boolean
+  agentName?: string
 }
 
 export function UserProfile({ 
@@ -19,23 +29,23 @@ export function UserProfile({
   isAgent = false,
   agentName
 }: UserProfileProps) {
-  const { profile, loading } = useEnsProfile(address);
-  const agent = isAgent ? items.find(i => i.id === address) : null;
+  const { profile, loading: ensLoading } = useEnsProfile(address)
+  const { dao, loading: daoLoading } = useDaoById(isAgent ? address : undefined)
   
-  if (!address || (loading && !isAgent)) return null;
+  if (!address || (ensLoading && !isAgent)) return null
 
   const displayName = isAgent 
-    ? agentName || agent?.title || 'Agent'
-    : profile?.name || truncateAddress(address);
+    ? agentName || dao?.name || 'DAO'
+    : profile?.name || truncateAddress(address)
 
-  const avatarSize = size === 'sm' ? 'h-6 w-6' : size === 'lg' ? 'h-12 w-12' : 'h-8 w-8';
+  const avatarSize = size === 'sm' ? 'h-6 w-6' : size === 'lg' ? 'h-12 w-12' : 'h-8 w-8'
 
   return (
     <div className="flex items-center gap-2">
       {showAvatar && (
         <Avatar className={avatarSize}>
           {isAgent ? (
-            <AvatarImage src={agent?.image || "/placeholder.svg"} />
+            <AvatarImage src={dao?.profile?.avatarImg || "/placeholder.svg"} />
           ) : (
             <AvatarImage src={profile?.avatar || undefined} />
           )}
@@ -50,5 +60,5 @@ export function UserProfile({
         </span>
       )}
     </div>
-  );
-} 
+  )
+}

@@ -51,11 +51,6 @@ export default function RootLayout({
                         </Link>
                       </li>
                       <li>
-                        <Link href="/daos" className="text-primary hover:text-primary/80 transition-colors">
-                          DAOs
-                        </Link>
-                      </li>
-                      <li>
                         <Link href="#" className="text-primary hover:text-primary/80 transition-colors">
                           About
                         </Link>

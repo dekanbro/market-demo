@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 export function ChatWindow({ 
   agentName, 
@@ -46,9 +47,16 @@ export function ChatWindow({
     await sendMessage(message);
   };
 
+  function getMessageStyles(content: string) {
+    if (content.includes('<tool-call>')) {
+      return 'bg-muted/50 border border-border';
+    }
+    return 'bg-muted';
+  }
+
   return (
-    <Card className="w-full h-[calc(100vh-10rem)] sm:h-[600px] flex flex-col">
-      <CardHeader className="p-4 flex flex-row items-center justify-between">
+    <Card className="w-full h-full flex flex-col">
+      <CardHeader className="p-4 flex flex-row items-center justify-between shrink-0">
         <CardTitle className="text-lg">Chat with {agentName}</CardTitle>
         <Button 
           variant="ghost" 
@@ -74,16 +82,11 @@ export function ChatWindow({
                       agentName={agentName}
                     />
                   )}
-                  <div className={`rounded-lg px-3 py-2 text-sm sm:text-base ${
-                    message.user === 'You' 
-                      ? 'bg-primary text-primary-foreground' 
-                      : message.isToolResponse
-                      ? message.status === 'error'
-                        ? 'bg-destructive/10 text-destructive'
-                        : 'bg-muted text-muted-foreground'
-                      : 'bg-secondary text-secondary-foreground'
-                  }`}>
-                    <p className="break-words">{message.message}</p>
+                  <div className={cn(
+                    "rounded-lg px-3 py-2 text-sm sm:text-base",
+                    message.user === 'You' ? "bg-primary text-primary-foreground" : getMessageStyles(message.message)
+                  )}>
+                    <p className="break-words">{message.message.replace(/<\/?tool-call>/g, '')}</p>
                     {message.data && (
                       <p className="text-xs mt-1 opacity-70 break-all">
                         {JSON.stringify(message.data)}
@@ -104,7 +107,7 @@ export function ChatWindow({
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="p-4 pt-2">
+      <CardFooter className="p-4 pt-2 shrink-0">
         <form onSubmit={handleSubmit} className="flex w-full gap-2">
           <Input
             value={input}

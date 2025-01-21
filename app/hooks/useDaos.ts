@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { DaoItem, HydratedDaoItem } from '@/app/lib/types'
 import { FEATURED_DAOS, REFERRER, DEFAULT_DAO_DATE } from '@/app/lib/constants'
+import { getDaoById } from '@/app/lib/dao-service'
 
 interface UseDaosOptions {
   chainId?: string;
@@ -55,4 +56,30 @@ export function useDaos({ chainId, filter }: UseDaosOptions = {}): UseDaosResult
 
   console.log("[Hook] Current state:", { daos, error, loading });
   return { daos, error, loading }
+}
+
+export function useDaoById(id?: string) {
+  const [dao, setDao] = useState<HydratedDaoItem | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!id) return
+
+    async function fetchDao() {
+      setLoading(true)
+      try {
+        const dao = await getDaoById(id as string)  // Type assertion since we've checked id exists
+        setDao(dao)
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to fetch DAO')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDao()
+  }, [id])
+
+  return { dao, loading, error }
 } 

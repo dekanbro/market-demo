@@ -85,7 +85,7 @@ export interface DaoResponse {
 
 // Add new types for the extra fields
 export type DaoStatus = 'featured' | 'active' | 'failed'
-export type DaoType = 'none' | 'yeeter' | 'venture' // extend as needed
+export type DaoType = 'none' | 'super' // extend as needed
 
 // Add interface for hydrated DAO
 export interface HydratedDaoItem extends DaoItem {

@@ -1,9 +1,6 @@
 import { HomePage } from '@/app/components/HomePage'
-import { getItems } from '@/app/lib/items'
 
-export default async function Home() {
-  const items = await getItems()
-
-  return <HomePage items={items} />
+export default function Home() {
+  return <HomePage />
 }
 
