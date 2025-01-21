@@ -1,7 +1,7 @@
 import { getGraphClient } from './graphql'
 import { gql } from 'graphql-request'
-import { DaoItem, DaoQueryResponse, DaoResponse } from './types'
-import { CHAIN_ID, DEFAULT_DAO_DATE, GRAPH } from './constants'
+import { DaoItem, DaoQueryResponse, DaoResponse, DaoStatus, DaoType, HydratedDaoItem } from './types'
+import { CHAIN_ID, DEFAULT_DAO_DATE, GRAPH, FEATURED_DAOS } from './constants'
 
 // GraphQL Fragments
 const daoFields = gql`
@@ -215,6 +215,39 @@ interface CombinedDaoParams extends FilteredDaoParams {
   ids?: string[];
 }
 
+// Add hydration function
+function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
+  // Check if DAO is featured
+  const isFeatured = FEATURED_DAOS.some(featured => featured.id === dao.id)
+  
+  // Parse profile data
+  let profile = undefined
+  if (dao.rawProfile?.[0]?.content) {
+    try {
+      profile = JSON.parse(dao.rawProfile[0].content)
+    } catch (e) {
+      console.error("[DAO] Failed to parse profile:", e)
+    }
+  }
+
+  // Determine status (can add more complex logic later)
+  let status: DaoStatus = 'failed'
+  if (isFeatured) status = 'featured'
+  // else if (dao.activeMemberCount > 0) status = 'active'
+
+  console.log("[DAO] Hydrating DAO:", dao.id, status)
+  console.log("[DAO] DAO:", dao.rawProfile)
+
+  return {
+    ...dao,
+    profile,
+    status,
+    comingSoon: false,
+    type: 'none',
+    price: 0
+  }
+}
+
 export async function fetchDaos({ 
   chainId = CHAIN_ID.BASE, 
   filter 
@@ -406,7 +439,7 @@ export async function fetchFeaturedAndRecentDaos({
   featuredIds: string[];
   first?: number;
   createdAfter?: string;
-}): Promise<DaoResponse> {
+}): Promise<{ daos: HydratedDaoItem[]; error: string | null; loading: boolean }> {
   try {
     const client = createGraphClient(chainId)
     
@@ -434,8 +467,9 @@ export async function fetchFeaturedAndRecentDaos({
       new Map(allDaos.map(dao => [dao.id, dao])).values()
     )
 
-    // Sort by createdAt descending
-    const sortedDaos = uniqueDaos.sort((a, b) => 
+    // Hydrate and sort DAOs
+    const hydratedDaos = uniqueDaos.map(hydrateDaoData)
+    const sortedDaos = hydratedDaos.sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
 

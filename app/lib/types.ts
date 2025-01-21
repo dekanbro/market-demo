@@ -82,3 +82,15 @@ export interface DaoResponse {
   error: string | null;
   loading: boolean;
 }
+
+// Add new types for the extra fields
+export type DaoStatus = 'featured' | 'active' | 'failed'
+export type DaoType = 'none' | 'yeeter' | 'venture' // extend as needed
+
+// Add interface for hydrated DAO
+export interface HydratedDaoItem extends DaoItem {
+  status: DaoStatus;
+  comingSoon: boolean;
+  type: DaoType;
+  price: number;
+}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DaoItem } from '@/app/lib/types'
+import { DaoItem, HydratedDaoItem } from '@/app/lib/types'
 import { FEATURED_DAOS, REFERRER, DEFAULT_DAO_DATE } from '@/app/lib/constants'
 
 interface UseDaosOptions {
@@ -10,8 +10,14 @@ interface UseDaosOptions {
   createdAfter?: string;
 }
 
-export function useDaos({ chainId, filter }: UseDaosOptions = {}) {
-  const [daos, setDaos] = useState<DaoItem[]>([])
+interface UseDaosResult {
+  daos: HydratedDaoItem[];
+  error: string | null;
+  loading: boolean;
+}
+
+export function useDaos({ chainId, filter }: UseDaosOptions = {}): UseDaosResult {
+  const [daos, setDaos] = useState<HydratedDaoItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
