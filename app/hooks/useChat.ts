@@ -28,7 +28,8 @@ function handleToolResponse(response: ToolResponse): Omit<Message, 'id'> {
 }
 
 export function useChat(itemId: string, initialMessage?: string) {
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken, user } = usePrivy();
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentToolCall, setCurrentToolCall] = useState<{
@@ -67,6 +68,7 @@ export function useChat(itemId: string, initialMessage?: string) {
       if (!token) {
         throw new Error('Not authenticated');
       }
+      console.log("member address from use chat hook", user?.wallet?.address);
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -74,7 +76,7 @@ export function useChat(itemId: string, initialMessage?: string) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           messages: [
             ...messages.map(m => ({
               role: m.user === 'You' ? 'user' : 'assistant',
@@ -85,7 +87,9 @@ export function useChat(itemId: string, initialMessage?: string) {
               content: message
             }
           ],
-          itemId 
+          itemId,
+          function_call: currentToolCall,
+          walletAddress: user?.wallet?.address
         }),
       });
 

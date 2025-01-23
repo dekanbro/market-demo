@@ -1,33 +1,22 @@
 'use client'
 
-import { createConfig } from '@wagmi/core'
+import { PrivyProvider } from '@privy-io/react-auth'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
 import { base } from 'viem/chains'
-import { http } from 'viem'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { PrivyProvider } from '@privy-io/react-auth'
-import { DEFAULT_CHAIN } from '@/app/lib/constants'
+import { ReactNode } from 'react'
+import { config, queryClient } from '../lib/wagmi'
 
-// Configure for Base
-const config = createConfig({
-  chains: [base],
-  transports: {
-    [base.id]: http()
-  }
-})
+interface ProvidersProps {
+  children: ReactNode
+}
 
-const queryClient = new QueryClient()
-
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children }: ProvidersProps) {
   return (
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
       config={{
         loginMethods: ['email', 'wallet'],
-        appearance: {
-          theme: 'dark',
-          accentColor: '#676FFF',
-        },
         defaultChain: base,
         supportedChains: [base]
       }}

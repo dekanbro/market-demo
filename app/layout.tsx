@@ -3,9 +3,11 @@ import { Inter } from 'next/font/google'
 import Link from 'next/link'
 import { ThemeProvider } from '@/components/theme-provider'
 import { DarkModeToggle } from '@/components/dark-mode-toggle'
-import { Providers } from '@/app/components/Providers'
+
 import { ConnectButton } from './components/ConnectButton'
 import Image from 'next/image'
+
+import { Providers } from './components/Providers'
 
 const inter = Inter({ subsets: ['latin'] })
 

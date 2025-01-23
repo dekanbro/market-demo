@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { getDaoById } from '@/app/lib/dao-service';
-import { executeFunctionCall } from './functions';
+import { executeFunctionCall } from './agent-registry';
 import { agentRegistry } from './agent-registry';
 import { AGENT_IDS } from '@/app/lib/constants'
 
@@ -11,13 +11,16 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
-  const { messages, itemId } = await req.json();
+  const { messages, itemId, walletAddress } = await req.json();
+
+ console.log("wallet address from route", walletAddress);
 
   let systemPrompt: string;
   let tools = [];
 
+  // Use itemId to determine which agent we're talking to
   if (itemId === AGENT_IDS.HELP || itemId === AGENT_IDS.SUMMONER) {
-    const agentConfig = agentRegistry[itemId as keyof typeof agentRegistry];
+    const agentConfig = agentRegistry[itemId];
     systemPrompt = await agentConfig.systemPrompt();
     tools = agentConfig.tools;
   } else {
@@ -28,7 +31,7 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    const agentConfig = agentRegistry[dao.type as keyof typeof agentRegistry] || agentRegistry['default'];
+    const agentConfig = agentRegistry[dao.type] || agentRegistry['default'];
     systemPrompt = await agentConfig.systemPrompt(dao);
     tools = agentConfig.tools;
   }
@@ -37,6 +40,7 @@ export async function POST(req: Request) {
     model: 'gpt-4-turbo-preview',
     messages: [
       { role: 'system', content: systemPrompt },
+      { role: 'user', content: `Connected Wallet/Member Address: ${walletAddress}` },
       ...messages,
     ],
     stream: true,
