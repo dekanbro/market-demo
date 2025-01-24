@@ -155,8 +155,8 @@ const queries = {
   getFeaturedAndRecentDaos: gql`
     query getFeaturedAndRecentDaos(
       $ids: [ID!]!
-      $skip: Int = 0
-      $first: Int = 100
+      $skip: Int = 0 
+      $first: Int = 200
       $orderBy: String = "createdAt"
       $orderDirection: String = "desc"
       $createdAfter: String

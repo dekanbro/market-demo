@@ -34,7 +34,18 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
             src={dao.profile?.avatarImg || '/placeholder.svg'}
             alt={dao.name}
             fill
-            className="object-cover"
+            className={cn(
+              "object-cover",
+              (!dao.profile?.avatarImg || dao.profile.avatarImg === '/placeholder.svg') && 
+                "dark:brightness-[0.8] dark:opacity-75"
+            )}
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              if (img.src !== '/placeholder.svg') {
+                img.src = '/placeholder.svg';
+                img.classList.add('dark:brightness-[0.8]', 'dark:opacity-75');
+              }
+            }}
           />
           <div className="absolute top-2 left-2 flex gap-2">
             {dao.type === 'super' && (
@@ -49,16 +60,19 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
               className={cn(
                 "border-2",
                 {
-                  "border-green-500 bg-green-500/10 text-green-500": dao.status === "featured",
-                  "border-blue-500 bg-blue-500/10 text-blue-500": dao.status === "active",
-                  "border-gray-500 bg-gray-500/10 text-gray-500": dao.status === "failed"
+                  "border-green-500 bg-green-500/20 backdrop-blur-sm text-green-500 dark:bg-green-950/60 dark:text-green-400": dao.status === "featured",
+                  "border-blue-500 bg-blue-500/20 backdrop-blur-sm text-blue-500 dark:bg-blue-950/60 dark:text-blue-400": dao.status === "active",
+                  "border-gray-500 bg-gray-500/20 backdrop-blur-sm text-gray-500 dark:bg-gray-950/60 dark:text-gray-400": dao.status === "failed"
                 }
               )}
             >
               {dao.status}
             </Badge>
             {dao.comingSoon && (
-              <Badge variant="outline" className="border-2 border-yellow-500 bg-yellow-500/10 text-yellow-500">
+              <Badge 
+                variant="outline" 
+                className="border-2 border-yellow-500 bg-yellow-500/20 backdrop-blur-sm text-yellow-500 dark:bg-yellow-950/60 dark:text-yellow-400"
+              >
                 Coming Soon
               </Badge>
             )}

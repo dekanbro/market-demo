@@ -6,6 +6,7 @@ import { type DaoSummonParams } from '@/app/lib/contracts/schemas'
 import { DEFAULT_DAO_PARAMS, DEFAULT_GOAL, DEFAULT_MEME_YEETER_VALUES, DEFAULT_YEETER_VALUES, END_TIME, START_TIME } from '@/app/lib/contracts/constants'
 import { daoSummoner } from '@/app/lib/contracts/summoner-functions'
 import OpenAI from 'openai'
+import { ImageService } from '@/app/lib/image-service'
 
 
 // At the top of the file, add an interface for agent config
@@ -289,7 +290,6 @@ export async function createDao(params: {
 }
 
 async function generateArt(prompt: string): Promise<string> {
-
   try {
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY!
@@ -298,18 +298,29 @@ async function generateArt(prompt: string): Promise<string> {
     const response = await openai.images.generate({
       model: "dall-e-3",
       prompt,
-      size: "1024x1024",
+      size: "512x512",
       quality: "standard",
       n: 1,
     });
 
     const imageUrl = response.data[0].url;
 
+    if (!imageUrl) {
+      throw new Error('Failed to generate artwork');
+    }
+    
+    // Upload to ImgBB if we have an API key
     if (process.env.IMG_BB_API_KEY) {
+      const imageService = new ImageService(process.env.IMG_BB_API_KEY);
+      const uploadResult = await imageService.uploadImage(imageUrl);
       
+      if (uploadResult.success) {
+        return `Successfully generated and uploaded artwork: ${uploadResult.url}`;
+      }
+      
+      console.error('Upload failed:', uploadResult.error);
     }
 
-    console.log(`Successfully Generated artwork: ${imageUrl}`);
     return `Successfully generated artwork: ${imageUrl}`;
 
   } catch (error) {
