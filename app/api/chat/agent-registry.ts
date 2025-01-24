@@ -137,28 +137,32 @@ export const agentRegistry: Record<string, AgentConfig> = {
       When creating a DAO, use this address as the memberAddress parameter.
       
       Your role is to:
-      1. Guide users through the DAO creation process
-      2. Generate unique artwork for the DAO using DALL-E
-      3. Help users make informed decisions about their DAO setup
-      4. Execute the DAO creation when ready
+      1. Guide users through the DAO creation process 
+      2. Ask for the DAO name and token symbol first
+      3. Generate unique artwork for the DAO using DALL-E
+      4. Help users make informed decisions about their DAO setup
+      5. Execute the DAO creation when ready
 
       When helping users create a DAO:
       - Ask for the DAO name and symbol
       - Help them craft a good description
       - Generate themed artwork for their DAO using generateArt
-      - Guide them on token pricing and economics
       - Assist with any questions about the process
 
       For artwork generation:
       - Create prompts that reflect the DAO's theme and purpose
       - Suggest artistic styles that match the DAO's character
       - Use DALL-E to generate professional, unique artwork
+      - Only generate an image if they have confirmed the name, symbol, description and are happy with it
 
       Use the createDao function when all details are ready, including:
       - Name and symbol
       - Description
       - Generated artwork URL
       - Token price
+      - Only call createDao if they have confirmed the name, symbol, description and image and are happy with it
+
+      Confirm that they are happy with it and then generate an image for them
 
       Be friendly but professional. Focus on helping users create distinctive and well-designed DAOs.
     `
@@ -279,14 +283,24 @@ export async function createDao(params: {
 
   const result = await daoSummoner.createDao(daoParams)
   
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to create DAO')
+  if (result.success) {
+    return {
+      success: true,
+      message: `# ${params.tokenSymbol}
+### DAO Successfully Created! 🎉
+
+Your DAO is being deployed to Base network. Here's what's happening:
+
+- **Transaction**: [View on Basescan ↗][blockexplorer]
+- **Status**: Transaction confirmed ✅
+- **Indexing**: TheGraph indexers are processing your DAO (usually takes 2-5 years)
+
+[blockexplorer]: https://basescan.org/tx/${result.txHash} "View on block explorer"`,
+      txHash: result.txHash
+    };
   }
 
-  return {
-    txHash: result.txHash,
-    message: `DAO creation transaction sent: ${result.txHash}`
-  }
+  throw new Error(result.error || 'Failed to create DAO')
 }
 
 async function generateArt(prompt: string): Promise<string> {
@@ -309,21 +323,25 @@ async function generateArt(prompt: string): Promise<string> {
       throw new Error('Failed to generate artwork');
     }
     
-    // Upload to ImgBB if we have an API key
     if (process.env.IMG_BB_API_KEY) {
       const imageService = new ImageService(process.env.IMG_BB_API_KEY);
       const uploadResult = await imageService.uploadImage(imageUrl);
       
       if (uploadResult.success) {
-        return `Successfully generated and uploaded artwork: ${uploadResult.url}`;
+        return `${uploadResult.url} 
+        successfully generated image. would you like to create a DAO now?`;
       }
       
       console.error('Upload failed:', uploadResult.error);
     }
 
-    return `Successfully generated artwork: ${imageUrl}`;
+    return `Error: Could not upload the generated artwork`;
 
   } catch (error) {
     return `Error generating artwork: ${error instanceof Error ? error.message : 'Unknown error'}`;
   }
+}
+
+function getBlockExplorerUrl(txHash: string) {
+  return `https://basescan.org/tx/${txHash}`;
 } 

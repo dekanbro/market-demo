@@ -30,6 +30,50 @@ interface ChatWindowProps {
   initialMessage?: string;
 }
 
+function renderMessageContent(message: string) {
+  // Match any image URL that ends with common image extensions
+  const imageMatch = message.match(/https?:\/\/\S+\.(?:png|jpe?g|gif|webp)/i)
+  
+  if (imageMatch) {
+    const imageUrl = imageMatch[0]
+    return (
+      <div className="space-y-2">
+        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
+          <Image 
+            src={imageUrl}
+            alt="Generated artwork"
+            fill
+            className="object-cover"
+          />
+        </div>
+        <ReactMarkdown 
+          className="prose dark:prose-invert"
+          components={{
+            a: ({ node, ...props }) => (
+              <a target="_blank" rel="noopener noreferrer" {...props} />
+            )
+          }}
+        >
+          {message}
+        </ReactMarkdown>
+      </div>
+    )
+  }
+
+  return (
+    <ReactMarkdown 
+      className="prose dark:prose-invert"
+      components={{
+        a: ({ node, ...props }) => (
+          <a target="_blank" rel="noopener noreferrer" {...props} />
+        )
+      }}
+    >
+      {message}
+    </ReactMarkdown>
+  )
+}
+
 export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProps) {
   const { user } = usePrivy();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -56,30 +100,6 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
       return 'bg-muted/50 border border-border';
     }
     return 'bg-muted';
-  }
-
-  function extractImageUrl(message: string): string | null {
-    // Check for @http format first
-    if (message.startsWith('@http')) {
-      const urlEnd = message.indexOf(' ');
-      return urlEnd === -1 ? message.slice(1) : message.slice(1, urlEnd);
-    }
-    
-    // Then check for regular image URLs
-    const imageSourcesPattern = Object.values(IMAGE_SOURCES).join('|');
-    const extensionsPattern = IMAGE_EXTENSIONS.join('|');
-    
-    const imageUrlRegex = new RegExp(
-      `https?:\\/\\/[^\\s<>"]+?(?:\\.(?:${extensionsPattern})|(?:${imageSourcesPattern})\\/[^\\s<>"]+)`,
-      'i'
-    );
-    
-    const match = message.match(imageUrlRegex);
-    return match ? match[0] : null;
-  }
-
-  function getProxiedImageUrl(url: string) {
-    return `/api/image-proxy?url=${encodeURIComponent(url)}`;
   }
 
   return (
@@ -114,22 +134,7 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
                     "rounded-lg px-3 py-2 text-sm sm:text-base",
                     message.user === 'You' ? "bg-primary text-primary-foreground" : getMessageStyles(message.message)
                   )}>
-                    {extractImageUrl(message.message) && (
-                      <div className="relative w-full aspect-square max-w-sm rounded-lg overflow-hidden">
-                        <Image 
-                          src={getProxiedImageUrl(extractImageUrl(message.message)!)}
-                          alt="Generated image"
-                          fill
-                          className="object-cover"
-                          loading="lazy"
-                          placeholder="blur"
-                          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQtJSEkMjU1LC0yMi4xODY6NT47Pi0uRUhFS2NRW11bMkFlbWRYbFBZW1f/2wBDARUXFx4aHR4eHVdeOjVeV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1f/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-                        />
-                      </div>
-                    )}
-                    <ReactMarkdown className="prose dark:prose-invert prose-sm">
-                      {message.message.replace(/<\/?tool-call>/g, '')}
-                    </ReactMarkdown>
+                    {renderMessageContent(message.message)}
                     {message.data && (
                       <p className="text-xs mt-1 opacity-70 break-all">
                         {JSON.stringify(message.data)}

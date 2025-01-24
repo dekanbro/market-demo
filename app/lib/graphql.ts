@@ -34,13 +34,11 @@ export function getGraphUrl({ chainId, graphKey, subgraphKey }: GraphUrlParams):
   }
 
   const url = `https://gateway-arbitrum.network.thegraph.com/api/${graphKey}/subgraphs/id/${subgraphHash}`;
-  console.log("[GraphQL] URL:", url);
   return url;
 }
 
 export function getGraphClient(params: GraphUrlParams): GraphQLClient {
   const url = getGraphUrl(params)
-  console.log("[GraphQL] Client params:", params);
   
   return new GraphQLClient(url, {
     headers: {

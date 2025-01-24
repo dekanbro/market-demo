@@ -22,8 +22,6 @@ I'm here to help you summon a new DAO. You'll need:
 
 You can also add a description and I can create an image for you.
 
-... or if you're feeling lucky, ask me to fill it with random stuff.
-
 **Ready to get started?**
   `}
       />

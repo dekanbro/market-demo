@@ -202,12 +202,12 @@ function createGraphClient(chainId: string = CHAIN_ID.BASE) {
 }
 
 function logRequest(params: Record<string, any>) {
-  const apiKey = process.env.GRAPH_API_KEY
-  console.log("[DAO] Making request with:", {
-    ...params,
-    graphKey: apiKey?.substring(0, 8) + '...',
-    subgraphKey: GRAPH.SUBGRAPH_KEYS.DAOHAUS
-  })
+  // const apiKey = process.env.GRAPH_API_KEY
+  // console.log("[DAO] Making request with:", {
+  //   ...params,
+  //   graphKey: apiKey?.substring(0, 8) + '...',
+  //   subgraphKey: GRAPH.SUBGRAPH_KEYS.DAOHAUS
+  // })
 }
 
 // Service Functions
@@ -249,8 +249,6 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
   let type: DaoType = 'none'
   if (isSuperAgent) type = 'super'
 
-  console.log("[DAO] Hydrating DAO:", dao.id, status)
-  console.log("[DAO] DAO:", dao.rawProfile)
 
   return {
     ...dao,
@@ -503,7 +501,6 @@ export async function fetchFeaturedAndRecentDaos({
 }
 
 export async function getDaoById(id: string, chainId = CHAIN_ID.BASE): Promise<HydratedDaoItem | null> {
-  console.log("[DAO] Fetching DAO by ID:", id)
   try {
     const client = createGraphClient(chainId)
     logRequest({ chainId, id })
