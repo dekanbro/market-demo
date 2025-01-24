@@ -13,19 +13,16 @@ import type { ValidationResult, EncodedParams } from './types'
 
 /**
  * Generates a unique salt nonce using current timestamp and random number
- * @returns Hex string to be used as salt nonce
+ * @returns BigInt to be used as salt nonce
  */
-export function getSaltNonce(): string {
+export function getSaltNonce(): bigint {
   const timestamp = BigInt(Math.floor(Date.now() / 1000)); // Unix timestamp in seconds
   const random = BigInt(Math.floor(Math.random() * 1000000));
   
-  // Use Viem's encodePacked and toHex
-  return keccak256(
-    encodePacked(
-      ['uint256', 'uint256'],
-      [timestamp, random]
-    )
-  );
+  // Combine timestamp and random number into a single BigInt
+  const combined = (timestamp << 20n) + random; // Shift timestamp left by 20 bits and add random
+  
+  return combined;
 }
 
 /**

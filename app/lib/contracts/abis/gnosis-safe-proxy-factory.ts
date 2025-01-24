@@ -1,10 +1,10 @@
-export const SafeFactoryAbi = [
+export const GnosisSafeProxyFactoryAbi = [
   {
     anonymous: false,
     inputs: [
       {
-        indexed: true,
-        internalType: "contract SafeProxy",
+        indexed: false,
+        internalType: "contract GnosisSafeProxy",
         name: "proxy",
         type: "address",
       },
@@ -24,9 +24,29 @@ export const SafeFactoryAbi = [
       { internalType: "bytes", name: "initializer", type: "bytes" },
       { internalType: "uint256", name: "saltNonce", type: "uint256" },
     ],
-    name: "createChainSpecificProxyWithNonce",
+    name: "calculateCreateProxyWithNonceAddress",
     outputs: [
-      { internalType: "contract SafeProxy", name: "proxy", type: "address" },
+      {
+        internalType: "contract GnosisSafeProxy",
+        name: "proxy",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "singleton", type: "address" },
+      { internalType: "bytes", name: "data", type: "bytes" },
+    ],
+    name: "createProxy",
+    outputs: [
+      {
+        internalType: "contract GnosisSafeProxy",
+        name: "proxy",
+        type: "address",
+      },
     ],
     stateMutability: "nonpayable",
     type: "function",
@@ -44,7 +64,11 @@ export const SafeFactoryAbi = [
     ],
     name: "createProxyWithCallback",
     outputs: [
-      { internalType: "contract SafeProxy", name: "proxy", type: "address" },
+      {
+        internalType: "contract GnosisSafeProxy",
+        name: "proxy",
+        type: "address",
+      },
     ],
     stateMutability: "nonpayable",
     type: "function",
@@ -57,21 +81,25 @@ export const SafeFactoryAbi = [
     ],
     name: "createProxyWithNonce",
     outputs: [
-      { internalType: "contract SafeProxy", name: "proxy", type: "address" },
+      {
+        internalType: "contract GnosisSafeProxy",
+        name: "proxy",
+        type: "address",
+      },
     ],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
     inputs: [],
-    name: "getChainId",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
+    name: "proxyCreationCode",
+    outputs: [{ internalType: "bytes", name: "", type: "bytes" }],
+    stateMutability: "pure",
     type: "function",
   },
   {
     inputs: [],
-    name: "proxyCreationCode",
+    name: "proxyRuntimeCode",
     outputs: [{ internalType: "bytes", name: "", type: "bytes" }],
     stateMutability: "pure",
     type: "function",

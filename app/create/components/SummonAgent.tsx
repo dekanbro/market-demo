@@ -11,7 +11,21 @@ export function SummonAgent() {
       <ChatWindow 
         agentName="Summoner Agent"
         itemId={SUMMON_AGENT_ID}
-        initialMessage={`Hello! I'm the Summon Agent, your guide to summoning a new DAO`}
+        initialMessage={`
+# Welcome to the Summoner Agent! 
+
+I'm here to help you summon a new DAO. You'll need:
+
+- A **name**
+- A **symbol** (ex. M$FT) 
+- A **price** (probably less than .1 ETH)
+
+You can also add a description and I can create an image for you.
+
+... or if you're feeling lucky, ask me to fill it with random stuff.
+
+**Ready to get started?**
+  `}
       />
     </Card>
   )

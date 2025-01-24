@@ -220,7 +220,7 @@ export async function executeFunctionCall(name: string, args: any) {
         console.error('Error creating DAO:', error)
         // return `Failed to create DAO: ${error instanceof Error ? error.message : 'unknown error'}`
         // dont return full error because the user will see it and it will be confusing
-        return `Failed to create DAO`
+        return `\nFailed to create DAO`
 
       }
 
@@ -298,7 +298,7 @@ async function generateArt(prompt: string): Promise<string> {
     const response = await openai.images.generate({
       model: "dall-e-3",
       prompt,
-      size: "512x512",
+      size: "1024x1024",
       quality: "standard",
       n: 1,
     });

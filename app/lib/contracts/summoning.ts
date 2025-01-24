@@ -11,12 +11,22 @@ import {
   getAddress,
   encodeAbiParameters,
   parseAbiParameters,
+  getContractAddress,
+  hexToBigInt,
 } from "viem";
+import { ethers } from "ethers";
 import { base } from "viem/chains";
 import { ADDITIONAL_ADDRESSES, CONTRACT_ADDRESSES } from "../wagmi";
-import { BasicHOSSummonerAbi } from "./abis/basic-hos-summoner";
-import { SafeFactoryAbi } from "./abis/safe-factory";
-import { Yeet24HOSSummonerAbi } from "./abis/yeet24-hos-summoner";
+
+import {
+  Yeet24HOSSummonerAbi,
+  BasicHOSSummonerAbi,
+  BaalAbi,
+  PosterAbi,
+  SafeL2Abi,
+  GnosisSafeProxyFactoryAbi,
+  SafeFactoryAbi,
+} from "./abis";
 import {
   isEthAddress,
   getSaltNonce,
@@ -37,7 +47,6 @@ import {
   SHARES_TRANSFER_PAUSED,
   LOOT_TRANSFER_PAUSED,
 } from "./constants";
-import { BaalAbi, PosterAbi, SafeL2Abi } from "./abis";
 
 // Create public client for contract reads
 const publicClient = createPublicClient({
@@ -56,7 +65,7 @@ const publicClient = createPublicClient({
  * @throws {Error} If summoner address is invalid or contract call fails
  */
 export async function calculateDaoAddress(
-  saltNonce: string,
+  saltNonce: bigint,
   client: ViemPublicClient = publicClient
 ): Promise<Address> {
   const summonerAddress = CONTRACT_ADDRESSES[base.id].YEET24_SUMMONER;
@@ -70,7 +79,7 @@ export async function calculateDaoAddress(
       address: summonerAddress,
       abi: BasicHOSSummonerAbi,
       functionName: "calculateBaalAddress",
-      args: [BigInt(saltNonce)],
+      args: [saltNonce],
     });
 
     if (!isEthAddress(daoAddress as string).isValid) {
@@ -92,14 +101,18 @@ export async function calculateDaoAddress(
  * @throws {Error} If contract addresses are invalid or call fails
  */
 export async function calculateCreateProxyWithNonceAddress(
-  saltNonce: string,
+  saltNonce: bigint,
+  fromAddress: Address, // member address
   client: ViemPublicClient = publicClient
 ): Promise<Address> {
+  const gnosisSafeProxyFactoryAddress =
+    CONTRACT_ADDRESSES[base.id].GNOSIS_SAFE_PROXY_FACTORY;
   const safeFactoryAddress = CONTRACT_ADDRESSES[base.id].SAFE_FACTORY;
   const masterCopyAddress = CONTRACT_ADDRESSES[base.id].SAFE_SINGLETON;
+  const baalSummonerAddress = CONTRACT_ADDRESSES[base.id].BAAL_SUMMONER;
   const initializer = "0x"; // Empty initializer
 
-  if (!isEthAddress(safeFactoryAddress).isValid) {
+  if (!isEthAddress(gnosisSafeProxyFactoryAddress).isValid) {
     throw new Error("Invalid safe factory address");
   }
   if (!isEthAddress(masterCopyAddress).isValid) {
@@ -108,19 +121,86 @@ export async function calculateCreateProxyWithNonceAddress(
 
   let expectedSafeAddress: Address = zeroAddress;
 
+
+  // create a new ethers contract
+  const provider = new ethers.JsonRpcProvider(
+    "https://mainnet.base.org",
+    8453
+  );
+
+  
+  // const signer = new ethers.Wallet(process.env.AGENT_PRIVATE_KEY as string, provider);
+  const gnosisSafeProxyFactory = new ethers.Contract(
+    gnosisSafeProxyFactoryAddress,
+    GnosisSafeProxyFactoryAbi,
+    provider
+  );
+
   try {
-    // Attempt to call the function to estimate gas, expecting it to revert
-    await client.call({
-      to: safeFactoryAddress,
-      data: encodeFunctionData({
-        abi: SafeFactoryAbi,
-        functionName: "calculateCreateProxyWithNonceAddress",
-        args: [masterCopyAddress, initializer, BigInt(saltNonce)],
-      }),
-    });
+    await gnosisSafeProxyFactory.calculateCreateProxyWithNonceAddress.estimateGas(
+      masterCopyAddress,
+      initializer,
+      saltNonce,
+      { from: gnosisSafeProxyFactoryAddress }
+    );
   } catch (e: any) {
-    // Extract the expected safe address from the revert message
     expectedSafeAddress = getSafeAddressFromRevertMessage(e);
+  }
+
+  //   try {
+  //   const creationCode = await client.readContract({
+  //     address: gnosisSafeProxyFactoryAddress,
+  //     abi: GnosisSafeProxyFactoryAbi,
+  //     functionName: "proxyCreationCode",
+  //     args: [],
+  //   });
+
+  //   const deploymentCode = encodePacked(
+  //     ['bytes', 'uint256'],
+  //     [creationCode, hexToBigInt(masterCopyAddress)]
+  //   )
+
+  //   const salt = keccak256(encodePacked(['bytes32', 'uint256'], [keccak256(encodePacked(['bytes'], [initializer])), saltNonce]))
+
+  //   console.log("creationCode", creationCode);
+  //   console.log("fromAddress", fromAddress);
+  //   console.log("saltNonce", saltNonce, `0x${saltNonce.toString(16)}` as `0x${string}`);
+  //   expectedSafeAddress = getContractAddress({
+  //     opcode: "CREATE2",
+  //     from: baalSummonerAddress as Address,
+  //     salt: salt,
+  //     bytecode: deploymentCode,
+  //   })
+  //   console.log("expectedSafeAddress", expectedSafeAddress);
+  //   const expectedSafeAddress2 = getContractAddress({
+  //     opcode: "CREATE2",
+  //     from: fromAddress as Address,
+  //     salt: salt,
+  //     bytecode: deploymentCode,
+  //   })
+  //   console.log("expectedSafeAddress2", expectedSafeAddress2);
+  // } catch (e: any) {
+  //   // Extract the expected safe address from the revert message
+  //   console.log("something went wrong with calculateCreateProxyWithNonceAddress", e);
+  //   throw new Error("Failed to calculate safe address");
+
+  // }
+
+  // try {
+  //   // Attempt to call the function to estimate gas, expecting it to revert
+  //   await client.simulateContract({
+  //     address: gnosisSafeProxyFactoryAddress,
+  //     abi: GnosisSafeProxyFactoryAbi,
+  //     functionName: "calculateCreateProxyWithNonceAddress",
+  //     args: [masterCopyAddress, initializer, saltNonce],
+  //   });
+  // } catch (e: any) {
+  //   // Extract the expected safe address from the revert message
+  //   expectedSafeAddress = getSafeAddressFromRevertMessage(e);
+  // }
+
+  if (expectedSafeAddress === zeroAddress) {
+    throw new Error("Failed to calculate safe address");
   }
 
   return expectedSafeAddress;
@@ -128,30 +208,17 @@ export async function calculateCreateProxyWithNonceAddress(
 
 const getSafeAddressFromRevertMessage = (e: any): Address => {
   let safeAddress: Address;
-  
-  console.log("Safe address error:", e);
-
-  // Handle Viem execution revert error
-  if (e.metaMessages) {
-    const dataLine = e.metaMessages.find((m: string) => m.includes('data:'));
-    if (dataLine) {
-      // Extract address from the data line (assuming it's in the correct position)
-      const match = dataLine.match(/0x[a-fA-F0-9]{40}/);
-      if (match) {
-        safeAddress = getAddress(match[0]) as Address;
-        return safeAddress;
-      }
-    }
-  }
 
   // Fallback to old error format
-  if (e.error?.error?.data) {
-    safeAddress = getAddress(e.error.error.data.slice(138, 178)) as Address;
+  if (e?.data) {
+    safeAddress = getAddress(`0x${e.data.slice(138, 178)}`) as Address;
   } else {
     // Try to find any hex address in the error message
     const messages: string[] = e.message?.split(" ") || [];
-    const addressMatch = messages.find(m => /^0x[a-fA-F0-9]{40}$/.test(m));
-    safeAddress = addressMatch ? (getAddress(addressMatch) as Address) : zeroAddress;
+    const addressMatch = messages.find((m) => /^0x[a-fA-F0-9]{40}$/.test(m));
+    safeAddress = addressMatch
+      ? (getAddress(addressMatch) as Address)
+      : zeroAddress;
   }
 
   if (safeAddress === zeroAddress) {
@@ -186,15 +253,15 @@ export function assembleLootTokenParams(
     throw new Error("Token name and symbol cannot be empty");
   }
 
-  const lootParams = encodeAbiParameters(
-    parseAbiParameters("string,string"),
-    [tokenConfig.name.trim() + "-LOOT", "l" + tokenConfig.symbol.trim()]
-  );
+  const lootParams = encodeAbiParameters(parseAbiParameters("string,string"), [
+    tokenConfig.name.trim() + "-LOOT",
+    "l" + tokenConfig.symbol.trim(),
+  ]);
 
-  return encodeAbiParameters(
-    parseAbiParameters("address,bytes"),
-    [lootSingleton, lootParams]
-  );
+  return encodeAbiParameters(parseAbiParameters("address,bytes"), [
+    lootSingleton,
+    lootParams,
+  ]);
 }
 
 /**
@@ -227,15 +294,15 @@ export function assembleSharesTokenParams(
     [tokenConfig.name.trim(), tokenConfig.symbol.trim()]
   );
 
-  return encodeAbiParameters(
-    parseAbiParameters("address,bytes"),
-    [sharesSingleton, sharesParams]
-  );
+  return encodeAbiParameters(parseAbiParameters("address,bytes"), [
+    sharesSingleton,
+    sharesParams,
+  ]);
 }
 
 export function shamanModuleConfigTx(
   calculatedShamanAddress: Address,
-  calculatedTreasuryAddress: Address,
+  calculatedTreasuryAddress: Address
 ): string {
   if (
     !isEthAddress(calculatedShamanAddress).isValid ||
@@ -251,21 +318,17 @@ export function shamanModuleConfigTx(
     functionName: "enableModule",
     args: [calculatedShamanAddress],
   });
-  const addModuleBytes = encodePacked(["bytes"], [addModule]);
 
   const execTxFromModule = encodeFunctionData({
     abi: SafeL2Abi,
     functionName: "execTransactionFromModule",
-    args: [calculatedTreasuryAddress, BigInt(0), addModuleBytes, 0],
+    args: [calculatedTreasuryAddress, BigInt(0), addModule, 0],
   });
-
-  console.log("execTxFromModule", execTxFromModule);
-  const execTxFromModuleBytes = encodePacked(["bytes"], [execTxFromModule]);
 
   const encoded = encodeFunctionData({
     abi: BaalAbi,
     functionName: "executeAsBaal",
-    args: [calculatedTreasuryAddress, BigInt(0), execTxFromModuleBytes],
+    args: [calculatedTreasuryAddress, BigInt(0), execTxFromModule],
   });
   if (typeof encoded === "string") {
     return encoded;
@@ -275,7 +338,7 @@ export function shamanModuleConfigTx(
 
 export function metadataConfigTx(
   yeeterConfig: Partial<YeeterConfig> = {},
-  calculatedDaoAddress: string,
+  calculatedDaoAddress: string
 ): string {
   const {
     daoName = yeeterConfig.daoName,
@@ -300,8 +363,6 @@ export function metadataConfigTx(
     authorAddress: memberAddress,
   };
 
-  console.log("content", content);
-
   const metadata = encodeFunctionData({
     abi: PosterAbi,
     functionName: "post",
@@ -310,11 +371,7 @@ export function metadataConfigTx(
   const encoded = encodeFunctionData({
     abi: BaalAbi,
     functionName: "executeAsBaal",
-    args: [
-      CONTRACT_ADDRESSES[base.id].POSTER,
-      BigInt(0),
-      metadata
-    ],
+    args: [CONTRACT_ADDRESSES[base.id].POSTER, BigInt(0), metadata],
   });
 
   return encoded;
@@ -345,26 +402,23 @@ export function governanceConfigTx(
       BigInt(minRetention),
     ]
   );
-    return encodeFunctionData({
-      abi: BaalAbi,
-      functionName: "setGovernanceConfig",
-      args: [encodedGovernanceConfig]
-    });
-
+  return encodeFunctionData({
+    abi: BaalAbi,
+    functionName: "setGovernanceConfig",
+    args: [encodedGovernanceConfig],
+  });
 }
 
 export function tokenConfigTx(
   daoAddress: Address,
   tokenConfig: Partial<YeeterConfig> = {}
 ): string {
-
   return encodeFunctionData({
     abi: BaalAbi,
     functionName: "setAdminConfig",
-    args: [SHARES_TRANSFER_PAUSED, LOOT_TRANSFER_PAUSED] // loot/shares paused true
+    args: [SHARES_TRANSFER_PAUSED, LOOT_TRANSFER_PAUSED], // loot/shares paused true
   });
 }
-
 
 //     return init_actions
 /**
@@ -412,7 +466,7 @@ export function assembleDaoInitActions(
     throw new Error("Invalid token configuration");
   }
   if (!yeeterConfig.memberAddress) {
-    console.log("member address from assembleDaoInitActions", yeeterConfig.memberAddress);
+
     throw new Error("Invalid member address");
   }
   if (!yeeterConfig.imageUrl) {
@@ -429,16 +483,10 @@ export function assembleDaoInitActions(
   // Encode token transfer config
   const tokenConfig = tokenConfigTx(daoAddress, yeeterConfig);
 
-  const metadataConfig = metadataConfigTx(
-    yeeterConfig,
-    daoAddress,
-  );
+  const metadataConfig = metadataConfigTx(yeeterConfig, daoAddress);
 
   // Encode shaman config
-  const shamanConfig = shamanModuleConfigTx(
-    shamanAddress,
-    treasuryAddress 
-  );
+  const shamanConfig = shamanModuleConfigTx(shamanAddress, treasuryAddress);
 
   return [governanceConfig, tokenConfig, metadataConfig, shamanConfig];
 }
@@ -475,10 +523,7 @@ export async function calculateMemeShamanAddress(
       functionName: "predictDeterministicShamanAddress",
       args: [yeet24Singleton, BigInt(saltNonce)],
     });
-    console.log(
-      "***>>>>>>>>>>>>>> expectedShamanAddress",
-      expectedShamanAddress
-    );
+
   } catch (e: any) {
     console.log("expectedShamanAddress error", e);
   }
@@ -549,7 +594,7 @@ export function assembleMarketMakerShamanParams(
       BigInt(endTime),
       parseInt(poolFee) as number,
     ]
-  )
+  );
 
   return {
     shamanSingleton,
@@ -581,13 +626,13 @@ export function assembleYeeterShamanParams(
     multiplier = DEFAULT_YEETER_VALUES.multiplier,
     isShares = DEFAULT_YEETER_VALUES.isShares,
     feeRecipients = DEFAULT_YEETER_VALUES.feeRecipients,
-    feeAmounts = DEFAULT_YEETER_VALUES.feeAmounts.map(a => BigInt(a)),
+    feeAmounts = DEFAULT_YEETER_VALUES.feeAmounts.map((a) => BigInt(a)),
     minThresholdGoal = DEFAULT_GOAL,
   } = yeeterConfig;
 
   const priceInWei = validateAndConvertPrice(price);
 
-  const feeAmount = BigInt(DEFAULT_YEETER_VALUES.feeAmounts[0])
+  const feeAmount = BigInt(DEFAULT_YEETER_VALUES.feeAmounts[0]);
 
   // Encode yeeter shaman p arameters
   const yeeterShamanParams = encodeAbiParameters(
@@ -601,7 +646,7 @@ export function assembleYeeterShamanParams(
       priceInWei,
       BigInt(multiplier),
       BigInt(minThresholdGoal),
-      [...feeRecipients as Address[], daoAddress as Address], // Add DAO address to recipients
+      [...(feeRecipients as Address[]), daoAddress as Address], // Add DAO address to recipients
       [...feeAmounts, feeAmount] as bigint[], // Add default fee
     ]
   );
@@ -617,14 +662,14 @@ export function assembleYeeterShamanParams(
 export function assembleShamanParams(
   daoAddress: Address,
   yeeterConfig: Partial<YeeterConfig> = {}
-) : {
-  mmShamanSingleton: Address,
-  mmShamanPermission: string,
-  mmShamanParams: string,
-  yShamanSingleton: Address,
-  yShamanPermission: string,
-  yShamanParams: string,
-  encoded: `0x${string}`,
+): {
+  mmShamanSingleton: Address;
+  mmShamanPermission: string;
+  mmShamanParams: string;
+  yShamanSingleton: Address;
+  yShamanPermission: string;
+  yShamanParams: string;
+  encoded: `0x${string}`;
 } {
   const marketMakerShamanParams = assembleMarketMakerShamanParams(
     daoAddress,
@@ -654,7 +699,9 @@ export function assembleShamanParams(
   //       [shaman_singletons, shaman_permissions, shaman_init_params]
   //   )
   const shamanSingletons = [mmShamanSingleton, yShamanSingleton] as const;
-  const shamanPermissions = [mmShamanPermission, yShamanPermission].map(p => BigInt(p));
+  const shamanPermissions = [mmShamanPermission, yShamanPermission].map((p) =>
+    BigInt(p)
+  );
   const shamanInitParams = [mmShamanParams, yShamanParams] as const;
 
   return {
@@ -665,9 +712,10 @@ export function assembleShamanParams(
     yShamanPermission,
     yShamanParams,
     encoded: encodeAbiParameters(
-    parseAbiParameters("address[],uint256[],bytes[]"),
-    [shamanSingletons, shamanPermissions, shamanInitParams]
-  ) as `0x${string}`};
+      parseAbiParameters("address[],uint256[],bytes[]"),
+      [shamanSingletons, shamanPermissions, shamanInitParams]
+    ) as `0x${string}`,
+  };
 }
 
 /**
@@ -680,7 +728,7 @@ export function assembleShamanParams(
 export async function assembleMemeYeeterSummonerArgs(
   daoParams: Partial<DaoParams> = {},
   yeeterConfig: Partial<YeeterConfig> = {}
-): Promise<[`0x${string}`, `0x${string}`, `0x${string}`, string[], string]> {
+): Promise<[`0x${string}`, `0x${string}`, `0x${string}`, string[], bigint]> {
   try {
     // Generate salt nonce and calculate addresses
     const saltNonce = getSaltNonce();
@@ -699,53 +747,49 @@ export async function assembleMemeYeeterSummonerArgs(
       throw new Error("Invalid loot singleton address");
     }
 
-
     // Assemble parameters
-    console.log("***>>>>>>>>>>>>>> assembleLootTokenParams", yeeterConfig);
     const lootTokenParams = assembleLootTokenParams(yeeterConfig);
-    console.log("loot token params", lootTokenParams);
-    console.log("***>>>>>>>>>>>>>> assembleSharesTokenParams", yeeterConfig);
     const sharesTokenParams = assembleSharesTokenParams(yeeterConfig);
-    console.log("shares token params", sharesTokenParams);
-    console.log("assemble shaman params");
 
     const shamanParams = assembleShamanParams(daoAddress, yeeterConfig);
-    console.log("shaman params", shamanParams);
-    console.log("assemble yeeter init actions");
 
     const index = BigInt(0);
     const shamanSaltNonce = generateShamanSaltNonce({
       baalAddress: daoAddress,
-      index, 
-      initializeParams: shamanParams.mmShamanParams as `0x${string}`, 
-      saltNonce: BigInt(saltNonce), 
-      shamanPermissions: BigInt(shamanParams.mmShamanPermission), 
-      shamanTemplate: shamanParams.mmShamanSingleton as Address});
+      index,
+      initializeParams: shamanParams.mmShamanParams as `0x${string}`,
+      saltNonce: saltNonce,
+      shamanPermissions: BigInt(shamanParams.mmShamanPermission),
+      shamanTemplate: shamanParams.mmShamanSingleton as Address,
+    });
     const shamanAddress = await calculateMemeShamanAddress(shamanSaltNonce);
 
-    console.log("shaman address", shamanAddress);
     if (!isEthAddress(shamanAddress).isValid) {
       throw new Error("Invalid shaman address");
     }
-    const treasuryAddress = await calculateCreateProxyWithNonceAddress(saltNonce);
-    console.log("treasury address", treasuryAddress);
+    if (!yeeterConfig.memberAddress) {
+      throw new Error("Invalid member address");
+    }
+    const treasuryAddress = await calculateCreateProxyWithNonceAddress(
+      saltNonce,
+      yeeterConfig.memberAddress as Address
+    );
     const initActions = assembleDaoInitActions(
-      treasuryAddress,
       daoAddress,
       shamanAddress,
+      treasuryAddress,
       daoParams,
       yeeterConfig,
       shamanParams.encoded
     );
-    console.log("assembled yeeter init actions", initActions);
-    console.log("salt nonce", saltNonce);
+
     // Return arrays for contract call
     const txArgs: [
       `0x${string}`,
       `0x${string}`,
       `0x${string}`,
       string[],
-      string
+      bigint
     ] = [
       lootTokenParams,
       sharesTokenParams,

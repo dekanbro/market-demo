@@ -11,37 +11,30 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const IMAGE_SOURCES = {
   DALLE: 'oaidalleapiprodscus.blob.core.windows.net',
   DALLE_LABS: 'dalle.com',
   LABS: 'labs.openai.com',
   IMGUR: 'i.imgur.com',
+  IMGBB: 'i.ibb.co',
   DISCORD: 'cdn.discordapp.com',
 } as const;
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'gif', 'png', 'webp'] as const;
 
-export function ChatWindow({ 
-  agentName, 
-  itemId, 
-  initialMessage 
-}: { 
-  agentName: string; 
+interface ChatWindowProps {
+  agentName: string;
   itemId: string;
   initialMessage?: string;
-}) {
+}
+
+export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProps) {
   const { user } = usePrivy();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState('');
-  const defaultMessage = agentName === 'Summoner' 
-    ? "Greetings, seeker of creation..."
-    : `Hello! I'm ${agentName}. How can I assist you today?`;
-    
-  const { messages, sendMessage, isLoading, clearHistory } = useChat(
-    itemId, 
-    initialMessage || defaultMessage
-  );
+  const { messages, sendMessage, isLoading, clearHistory } = useChat(itemId, initialMessage);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -50,13 +43,12 @@ export function ChatWindow({
     }
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const message = input;
+    if (!input.trim()) return;
+    
+    sendMessage(input);
     setInput('');
-    await sendMessage(message);
   };
 
   function getMessageStyles(content: string) {
@@ -98,9 +90,9 @@ export function ChatWindow({
           variant="ghost" 
           size="sm"
           onClick={clearHistory}
-          disabled={messages.length === 0 || isLoading}
+          disabled={messages.length === 1 || isLoading}
         >
-          Clear History
+          Clear Chat
         </Button>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-4">
@@ -154,6 +146,12 @@ export function ChatWindow({
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[200px]" />
+                <Skeleton className="h-4 w-[160px]" />
+              </div>
+            )}
             <div ref={scrollRef} />
           </div>
         </ScrollArea>
@@ -163,7 +161,7 @@ export function ChatWindow({
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder="Type a message..."
             className="flex-1 text-sm sm:text-base"
             disabled={isLoading}
           />
