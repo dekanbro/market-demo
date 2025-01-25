@@ -20,7 +20,7 @@ export function DaoChatDrawer({ open, onClose, title, daoId }: DaoChatDrawerProp
         <ChatWindow 
           agentName={title}
           itemId={daoId}
-          initialMessage={`Hello! I'm ${title}. How can I assist you today?`}
+          initialMessage={`Hello! I'm ${title}. How can I assist you today? I can tell you about the DAO or details about proposals and members`}
         />
       </SheetContent>
     </Sheet>

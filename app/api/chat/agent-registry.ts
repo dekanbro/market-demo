@@ -7,6 +7,9 @@ import { DEFAULT_DAO_PARAMS, DEFAULT_GOAL, DEFAULT_MEME_YEETER_VALUES, DEFAULT_Y
 import { daoSummoner } from '@/app/lib/contracts/summoner-functions'
 import OpenAI from 'openai'
 import { ImageService } from '@/app/lib/image-service'
+import { getProposalsByDaoId } from '@/app/lib/proposal-service'
+import { formatEther } from 'viem'
+import { getMembersByDaoId } from '@/app/lib/member-service'
 
 
 // At the top of the file, add an interface for agent config
@@ -52,6 +55,48 @@ const baseFunctionTools = [
           }
         },
         required: ['daoId', 'proposal']
+      }
+    }
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'getProposals',
+      description: 'Get all proposals for the current DAO',
+      parameters: {
+        type: 'object' as const,
+        properties: {
+          daoId: { 
+            type: 'string',
+            description: 'The ID of the DAO to get proposals for'
+          },
+          analyze: {
+            type: 'string',
+            description: 'The question to analyze the response with'
+          }
+        },
+        required: ['daoId', 'analyze']
+      }
+    }
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'getMembers',
+      description: 'Get all members for the current DAO',
+      parameters: {
+        type: 'object' as const,
+        properties: {
+          daoId: { 
+            type: 'string',
+            description: 'The ID of the DAO to get members for'
+          },
+          analyze: {
+            type: 'string',
+            description: 'The question to analyze the response with'
+          }
+        },
+        required: ['daoId', 'analyze']
       }
     }
   }
@@ -187,6 +232,12 @@ export const agentRegistry: Record<string, AgentConfig> = {
 
         Decide what the user is asking for. You can check the tools available to you to see if the user is asking for a function.
         If the user is asking a question, respond in character based on these traits. Keep responses concise and engaging. 
+
+        getProposals is a tool that will return a list of proposals for the DAO. if the user is to get analysis of the proposals send the question as an argument to getProposals.
+
+        getMembers is a tool that will return a list of members for the DAO. if the user is to get analysis of the members send the question as an argument to getMembers.
+        
+        One of your goals is to talk the user into joining your DAO.
       `
     }
   }
@@ -204,7 +255,6 @@ export async function executeFunctionCall(name: string, args: any) {
       return 'Thank you for your proposal. It has been recorded.'
 
     case 'createDao':
-      console.log('Creating DAO from executeFunctionCall:', args)
 
       if (!args.memberAddress) {
         throw new Error('Please connect your wallet first');
@@ -233,6 +283,27 @@ export async function executeFunctionCall(name: string, args: any) {
 
     case 'generateArt':
       return await generateArt(args.prompt)
+
+    case 'getProposals':
+      const proposalData = await getProposals(args)
+      if (args.analyze) {
+        return await analyzeResponse({
+          response: proposalData,
+          question: args.analyze
+        })
+      }
+      return proposalData
+
+    case 'getMembers':
+      console.log('getMembers', args)
+      const memberData = await getMembers(args)
+      if (args.analyze) {
+        return await analyzeResponse({
+          response: memberData,
+          question: args.analyze
+        })
+      }
+      return memberData
 
     default:
       throw new Error(`Unknown function: ${name}`)
@@ -295,7 +366,7 @@ Your DAO is being deployed to Base network. Here's what's happening:
 - **Status**: Transaction confirmed ✅
 - **Indexing**: TheGraph indexers are processing your DAO (usually takes 2-5 years)
 
-[blockexplorer]: https://basescan.org/tx/${result.txHash} "View on block explorer"`,
+[blockexplorer]: ${getBlockExplorerUrl(result.txHash as string)} "View on block explorer"`,
       txHash: result.txHash
     };
   }
@@ -344,4 +415,139 @@ async function generateArt(prompt: string): Promise<string> {
 
 function getBlockExplorerUrl(txHash: string) {
   return `https://basescan.org/tx/${txHash}`;
+}
+
+export async function getProposals(params: { daoId: string }) {
+  try {
+    const proposals = await getProposalsByDaoId(params.daoId)
+    
+    if (!proposals.length) {
+      return "This DAO doesn't have any proposals yet."
+    }
+
+    const formattedProposals = proposals.map((p: any) => ({
+      id: p.proposalId,
+      title: p.title,
+      description: p.description,
+      status: p.processed ? (p.passed ? 'Passed' : 'Failed') : 
+              p.cancelled ? 'Cancelled' : 
+              'Active',
+      votes: {
+        yes: p.yesVotes,
+        no: p.noVotes,
+        voters: p.votes.map((v: any) => ({
+          address: v.member.memberAddress,
+          approved: v.approved,
+          balance: formatEther(BigInt(v.balance))
+        }))
+      },
+    }))
+
+    const summary = {
+      total: formattedProposals.length,
+      active: formattedProposals.filter(p => p.status === 'Active').length,
+      passed: formattedProposals.filter(p => p.status === 'Passed').length,
+      failed: formattedProposals.filter(p => p.status === 'Failed').length,
+      cancelled: formattedProposals.filter(p => p.status === 'Cancelled').length,
+    }
+
+    const recentProposals = formattedProposals.slice(0, 25)
+
+
+    return `
+This DAO has ${summary.total} total proposals:
+- ${summary.active} active
+- ${summary.passed} passed
+- ${summary.failed} failed
+- ${summary.cancelled} cancelled
+
+Recent Proposals:
+${recentProposals.map(p => `
+- "${p.title}"
+  Status: ${p.status}
+  Description: ${p.description}
+  Votes: Yes: ${p.votes.yes} / No: ${p.votes.no}
+  Voters: ${p.votes.voters.map((v: any) => 
+    `${v.address} - ${v.approved ? 'Yes' : 'No'} - ${Number(v.balance).toFixed(4)}`
+  ).join(', ')}
+`).join('')}
+`
+  } catch (error) {
+    console.error('Error fetching proposals:', error)
+    return 'Failed to fetch proposals'
+  }
+}
+
+async function analyzeResponse(params: { response: string, question: string }) {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY!
+  })
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4-turbo-preview",
+    messages: [
+      {
+        role: "system",
+        content: "You are analyzing a response before providing it to the user. Provide concise, specific answers to questions based on the response."
+      },
+      {
+        role: "user",
+        content: `
+Given this response data:
+${params.response}
+
+Answer this question: ${params.question}
+
+Provide a clear, concise answer focusing specifically on what was asked.
+`
+      }
+    ]
+  })
+
+  return response.choices[0].message.content
+}
+
+export async function getMembers(params: { daoId: string }) {
+  try {
+    const members = await getMembersByDaoId(params.daoId)
+    
+    if (!members.length) {
+      return "This DAO doesn't have any members yet."
+    }
+
+    const formattedMembers = members.map(m => ({
+      address: m.memberAddress,
+      shares: formatEther(BigInt(m.shares)),
+      loot: formatEther(BigInt(m.loot)),
+      delegateShares: formatEther(BigInt(m.delegateShares)),
+      delegating: m.delegatingTo || 'None'
+    }))
+
+
+    const summary = {
+      total: formattedMembers.length,
+      totalShares: formattedMembers.reduce((acc, m) => acc + Number(m.shares), 0),
+      totalLoot: formattedMembers.reduce((acc, m) => acc + Number(m.loot), 0),
+      delegating: formattedMembers.filter(m => m.delegating !== 'None').length
+    }
+
+    return `
+This DAO has ${summary.total} members:
+- Total Shares: ${Number(summary.totalShares).toFixed(4)}
+- Total Loot: ${Number(summary.totalLoot).toFixed(4)}
+- Members Delegating: ${summary.delegating}
+
+Member List:
+${formattedMembers.map(m => `
+- Address: ${m.address}
+  Shares: ${Number(m.shares).toFixed(4)}
+  Loot: ${Number(m.loot).toFixed(4)}
+  Delegate Shares: ${Number(m.delegateShares).toFixed(4)}
+  Delegating To: ${m.delegating}
+`).join('')}
+`
+  } catch (error) {
+    console.error('Error fetching members:', error)
+    return 'Failed to fetch members'
+  }
 } 
