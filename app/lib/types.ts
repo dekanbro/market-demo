@@ -32,6 +32,7 @@ export interface DaoItem {
   profile?: DaoProfile;
   shamen: ShamanItem[];
   vaults: VaultItem[];
+  yeeterData?: YeeterData | null;
 }
 
 export interface DaoProfile {
@@ -93,4 +94,21 @@ export interface HydratedDaoItem extends DaoItem {
   comingSoon: boolean;
   type: DaoType;
   price: number;
+  profile?: any;
+  yeeterData?: YeeterData | null;
+  isPresale?: boolean;
+
+}
+
+export interface YeeterData {
+  id: string;
+  endTime: string;
+  startTime: string;
+  isShares: boolean;
+  multiplier: string;
+  minTribute: string;
+  goal: string;
+  balance: string;
+  yeetCount: string;
+  vault: string;
 }

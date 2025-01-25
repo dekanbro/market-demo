@@ -8,6 +8,7 @@ import { DaoInfo } from './DaoInfo'
 import { DaoTabs } from './DaoTabs'
 import { DaoActions } from './DaoActions'
 import { DaoImage } from './DaoImage'
+import { CountdownTimer } from './CountdownTimer'
 
 export function DaoDetails({ id }: { id: string }) {
   const [dao, setDao] = useState<HydratedDaoItem | null>(null)
@@ -41,6 +42,12 @@ export function DaoDetails({ id }: { id: string }) {
         <DaoImage dao={dao} />
         <div className="space-y-6">
           <DaoHeader dao={dao} />
+          {dao.yeeterData && (
+            <CountdownTimer 
+              startTime={dao.yeeterData.startTime} 
+              endTime={dao.yeeterData.endTime}
+            />
+          )}
           <DaoInfo dao={dao} />
           <DaoActions dao={dao} />
         </div>

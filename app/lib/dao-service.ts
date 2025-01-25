@@ -1,7 +1,7 @@
 import { getGraphClient } from './graphql'
 import { gql } from 'graphql-request'
 import { DaoItem, DaoQueryResponse, DaoResponse, DaoStatus, DaoType, HydratedDaoItem } from './types'
-import { CHAIN_ID, DEFAULT_DAO_DATE, GRAPH, FEATURED_DAOS, SUPER_AGENTS } from './constants'
+import { CHAIN_ID, DEFAULT_DAO_DATE, GRAPH, FEATURED_DAOS, SUPER_AGENTS, REFERRER } from './constants'
 
 
 // GraphQL Fragments
@@ -187,6 +187,58 @@ const queries = {
   `
 }
 
+const yeeterFields = `
+id
+createdAt
+dao {
+  id
+}
+endTime
+startTime
+isShares
+multiplier
+minTribute
+goal
+balance
+yeetCount
+vault
+`;
+
+export const GET_YEETER = gql`
+  query yeeterByDao($daoId: String!) {
+    yeeters(
+      first: 1,
+      orderBy: createdAt,
+      orderDirection: desc,
+      where: {
+        dao_: {
+          id: $daoId
+        }
+      }
+    ) {
+      ${yeeterFields}
+    }
+  }
+`;
+
+export const GET_YEETERS = gql`
+  {
+    yeeters(
+      first: 1000, 
+      orderBy: createdAt, 
+      orderDirection: desc
+      where: {
+        dao_: {
+          referrer: "${REFERRER}"
+        }
+      }
+    ) {
+      ${yeeterFields}
+
+    }
+  }
+`;
+
 // Helper Functions
 function createGraphClient(chainId: string = CHAIN_ID.BASE) {
   const apiKey = process.env.GRAPH_API_KEY
@@ -210,6 +262,20 @@ function logRequest(params: Record<string, any>) {
   // })
 }
 
+// Create a separate client for yeeter subgraph
+function createYeeterClient(chainId: string = CHAIN_ID.BASE) {
+  const apiKey = process.env.GRAPH_API_KEY
+  if (!apiKey) {
+    throw new Error('Graph API key is not configured')
+  }
+
+  return getGraphClient({
+    chainId,
+    graphKey: apiKey,
+    subgraphKey: GRAPH.SUBGRAPH_KEYS.YEETER
+  })
+}
+
 // Service Functions
 interface DaoQueryParams {
   chainId?: string;
@@ -227,11 +293,9 @@ interface CombinedDaoParams extends FilteredDaoParams {
 
 // Add hydration function
 function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
-  // Check if DAO is featured
   const isFeatured = FEATURED_DAOS.some(featured => featured.id === dao.id)
   const isSuperAgent = SUPER_AGENTS.some(agent => agent.id === dao.id)
   
-  // Parse profile data
   let profile = undefined
   if (dao.rawProfile?.[0]?.content) {
     try {
@@ -241,22 +305,35 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     }
   }
 
-  // Determine status (can add more complex logic later)
   let status: DaoStatus = 'failed'
   if (isFeatured) status = 'featured'
-  // else if (dao.activeMemberCount > 0) status = 'active'
 
   let type: DaoType = 'none'
   if (isSuperAgent) type = 'super'
+
+  // Check presale status
+  let comingSoon = false
+  let isPresale = false
+  
+  if (dao.yeeterData?.startTime && dao.yeeterData?.endTime) {
+    const now = Date.now()
+    const startTime = parseInt(dao.yeeterData.startTime) * 1000
+    const endTime = parseInt(dao.yeeterData.endTime) * 1000
+    const twoDaysFromNow = now + (2 * 24 * 60 * 60 * 1000)
+    
+    comingSoon = startTime > now && startTime <= twoDaysFromNow
+    isPresale = now >= startTime && now < endTime
+  }
 
 
   return {
     ...dao,
     profile,
     status,
-    comingSoon: false,
+    comingSoon,
     type,
-    price: 0
+    price: 0,
+    isPresale
   }
 }
 
@@ -500,20 +577,40 @@ export async function fetchFeaturedAndRecentDaos({
   }
 }
 
+interface YeeterData {
+  id: string;
+  endTime: string;
+  startTime: string;
+  isShares: boolean;
+  multiplier: string;
+  minTribute: string;
+  goal: string;
+  balance: string;
+  yeetCount: string;
+  vault: string;
+}
+
 export async function getDaoById(id: string, chainId = CHAIN_ID.BASE): Promise<HydratedDaoItem | null> {
   try {
-    const client = createGraphClient(chainId)
-    logRequest({ chainId, id })
+    const [daoClient, yeeterClient] = [createGraphClient(chainId), createYeeterClient(chainId)]
     
-    const data = await client.request<{ dao: DaoItem }>(
+    const daoData = await daoClient.request<{ dao: DaoItem }>(
       queries.getDaoById,
       { id }
-    )
+    );
 
-    if (!data.dao) return null
+    if (!daoData.dao) return null
 
-    // Hydrate the DAO data
-    const hydratedDao = hydrateDaoData(data.dao)
+    // Query yeeter by dao ID instead of shaman address
+    const yeeterData = await yeeterClient.request<{ yeeters: YeeterData[] }>(
+      GET_YEETER,
+      { daoId: id }
+    );
+
+    const hydratedDao = hydrateDaoData({
+      ...daoData.dao,
+      yeeterData: yeeterData.yeeters?.[0] || null
+    })
     
     return hydratedDao
   } catch (error) {

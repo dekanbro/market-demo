@@ -68,11 +68,13 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
             >
               {dao.status}
             </Badge>
-            {dao.comingSoon && (
-              <Badge 
-                variant="outline" 
-                className="border-2 border-yellow-500 bg-yellow-500/20 backdrop-blur-sm text-yellow-500 dark:bg-yellow-950/60 dark:text-yellow-400"
-              >
+            {dao.isPresale && (
+              <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">
+                Presale Active
+              </Badge>
+            )}
+            {!dao.isPresale && dao.comingSoon && (
+              <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
                 Coming Soon
               </Badge>
             )}

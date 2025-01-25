@@ -19,7 +19,8 @@ export const GRAPH = {
   SUBGRAPH_KEYS: {
     DAOHAUS: 'DAOHAUS',
     YEETER: 'YEETER',
-  }
+  },
+  // ...rest of your graph constants
 } as const
 
 // API Routes
