@@ -3,7 +3,7 @@
 import { useEthBalance } from '@/app/hooks/useEthBalance'
 import { HydratedDaoItem } from '@/app/lib/types'
 import { PresaleProgress } from './PresaleProgress'
-
+import { CHAIN_ID } from '@/app/lib/constants'
 function formatDate(timestamp: string) {
   return new Date(parseInt(timestamp) * 1000).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -15,7 +15,7 @@ function formatDate(timestamp: string) {
 }
 
 export function DaoInfo({ dao }: { dao: HydratedDaoItem }) {
-  const { balance, isLoading } = useEthBalance(dao.safeAddress)
+  const { balance, isLoading } = useEthBalance(dao.safeAddress, dao.chainId)
 
   return (
     <div className="space-y-4">
@@ -45,6 +45,14 @@ export function DaoInfo({ dao }: { dao: HydratedDaoItem }) {
           <p className="text-xl font-medium">
             {isLoading ? '...' : `${Number(balance).toFixed(4)} ETH`}
           </p>
+          <a 
+            href={`https://admin.daohaus.club/#/molochv3/${dao.chainId}/${dao.id}/safes`} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-500 underline"
+          >
+            View Treasury
+          </a>
         </div>
       </div>
 

@@ -6,6 +6,7 @@ export const CHAIN_ID = {
   BASE: '0x2105',
   OPTIMISM: '0xa',
   POLYGON: '0x89',
+  GNOSIS: '0x64'  // Add Gnosis chain ID
 } as const
 
 // Default chain configuration
@@ -58,5 +59,16 @@ export const AGENT_IDS = {
   HELP: 'help-agent-0x1',
   SUMMONER: 'summoner-agent-0x1',
 } as const 
+
+// Add new constant for special DAOs on different chains
+export const SPECIAL_DAOS = {
+  GNOSIS: [
+    {
+      id: '0xf02fd4286917270cb94fbc13a0f4e1ed76f7e986',
+      chainId: '0x64',
+      name: 'Special DAO Name' // Optional: add other metadata as needed
+    }
+  ]
+} as const
 
 

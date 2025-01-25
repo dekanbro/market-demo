@@ -1,5 +1,6 @@
 export interface DaoItem {
   id: string;
+  chainId?: string;
   createdAt: string;
   createdBy: string;
   txHash: string;
@@ -97,7 +98,7 @@ export interface HydratedDaoItem extends DaoItem {
   profile?: any;
   yeeterData?: YeeterData | null;
   isPresale?: boolean;
-
+  isSpecialDao: boolean;
 }
 
 export interface YeeterData {

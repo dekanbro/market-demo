@@ -1,19 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { CHAIN_ID } from '../lib/constants'
 
-export function useEthBalance(address: string | undefined) {
+export function useEthBalance(address?: string, chainId?: string) {
   const [balance, setBalance] = useState<string>('0')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchBalance() {
       if (!address) return
-      
       try {
-        const res = await fetch(`/api/dao/balance/${address}`)
-        const data = await res.json()
-        if (data.error) throw new Error(data.error)
+        const response = await fetch(`/api/dao/balance/${address}?chainId=${chainId || CHAIN_ID.BASE}`)
+        const data = await response.json()
         setBalance(data.balance)
       } catch (error) {
         console.error('Error fetching balance:', error)
@@ -23,7 +22,7 @@ export function useEthBalance(address: string | undefined) {
     }
 
     fetchBalance()
-  }, [address])
+  }, [address, chainId])
 
   return { balance, isLoading }
 } 

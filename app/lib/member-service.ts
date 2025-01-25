@@ -1,6 +1,7 @@
 import { gql } from 'graphql-request'
 import { getGraphClient } from './graphql'
 import { CHAIN_ID, GRAPH } from './constants'
+import { SPECIAL_DAOS } from './constants'
 
 const memberFields = gql`
   fragment MemberFields on Member {
@@ -34,15 +35,21 @@ const GET_MEMBERS = gql`
   ${memberFields}
 `
 
-export async function getMembersByDaoId(daoId: string) {
+export async function getMembersByDaoId(daoId: string, chainId: string = CHAIN_ID.BASE) {
   const apiKey = process.env.GRAPH_API_KEY
   if (!apiKey) {
     throw new Error('Graph API key is not configured')
   }
 
+  // Check if this is a special DAO and use its chainId
+  const specialDao = SPECIAL_DAOS.GNOSIS.find(dao => dao.id === daoId)
+  if (specialDao) {
+    chainId = specialDao.chainId
+  }
+
   try {
     const client = getGraphClient({
-      chainId: CHAIN_ID.BASE,
+      chainId,
       graphKey: apiKey,
       subgraphKey: GRAPH.SUBGRAPH_KEYS.DAOHAUS
     })

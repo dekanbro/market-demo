@@ -55,6 +55,14 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
             )}
           </div>
           <div className="absolute top-2 right-2 flex gap-2">
+          {dao.isSpecialDao ? (
+            <Badge 
+              variant="outline" 
+              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
+            >
+              Notable DAO
+            </Badge>
+          ) : (
             <Badge 
               variant="outline" 
               className={cn(
@@ -67,7 +75,7 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
               )}
             >
               {dao.status}
-            </Badge>
+            </Badge>)}
             {dao.isPresale && (
               <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">
                 Presale Active
