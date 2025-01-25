@@ -10,6 +10,7 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { base } from 'viem/chains'
+import { formatEther, parseEther } from 'viem'
 
 /**
  * Creates and manages an agent's Ethereum account
@@ -90,6 +91,10 @@ export class AgentAccountManager {
     return this.walletClient
   }
 
+  getPublicClient(): PublicClient {
+    return this.publicClient
+  }
+
   /**
    * Monitors a transaction until it's mined
    * @param hash - Transaction hash to monitor
@@ -155,4 +160,16 @@ export class AgentAccountManager {
 }
 
 // Create singleton instance
-export const agentAccountManager = new AgentAccountManager() 
+export const agentAccountManager = new AgentAccountManager()
+
+const MIN_GAS_BALANCE = parseEther('0.0005')
+
+export async function checkAgentBalance() {
+  const balance = await agentAccountManager.getPublicClient().getBalance({ 
+    address: agentAccountManager.getAccount().address 
+  })
+  
+  if (balance < MIN_GAS_BALANCE) {
+    throw new Error(`Agent needs gas! Current balance: ${formatEther(balance)} ETH, agent address: ${agentAccountManager.getAccount().address}`)
+  }
+} 

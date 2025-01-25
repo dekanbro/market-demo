@@ -255,7 +255,6 @@ export async function executeFunctionCall(name: string, args: any) {
       return 'Thank you for your proposal. It has been recorded.'
 
     case 'createDao':
-
       if (!args.memberAddress) {
         throw new Error('Please connect your wallet first');
       }
@@ -272,10 +271,11 @@ export async function executeFunctionCall(name: string, args: any) {
         return result.message
       } catch (error) {
         console.error('Error creating DAO:', error)
-        // return `Failed to create DAO: ${error instanceof Error ? error.message : 'unknown error'}`
-        // dont return full error because the user will see it and it will be confusing
+        // Check for gas error from summoner
+        if (error instanceof Error && error.message.includes('Agent needs gas')) {
+          return `⚠️ The Agent Account needs gas to create DAOs. You can send funds to ${error.message.split('agent address: ')[1]} or try again later.`
+        }
         return `\nFailed to create DAO`
-
       }
 
     case 'forgeMetal':
@@ -319,45 +319,46 @@ export async function createDao(params: {
   imageUrl: string
   memberAddress: string
 }) {
-  console.log('Creating DAO from tool call:', params)
+  try {
+    console.log('Creating DAO from tool call:', params)
 
-  const now = Math.floor(Date.now() / 1000)
-  
-  const daoParams: DaoSummonParams = {
-    name: params.name,
-    description: params.description,
-    tokenConfig: {
-      name: params.tokenName,
-      symbol: params.tokenSymbol,
-    },
-    price: params.price,
-    memberAddress: params.memberAddress,
-    // Use defaults for governance params
-    votingPeriod: DEFAULT_DAO_PARAMS.VOTING_PERIOD,
-    gracePeriod: DEFAULT_DAO_PARAMS.GRACE_PERIOD,
-    proposalOffering: DEFAULT_DAO_PARAMS.PROPOSAL_OFFERING,
-    quorum: DEFAULT_DAO_PARAMS.QUORUM,
-    sponsorThreshold: DEFAULT_DAO_PARAMS.SPONSOR_THRESHOLD,
-    minRetention: DEFAULT_DAO_PARAMS.MIN_RETENTION,
-    // Set time parameters
-    startTime: START_TIME,
-    endTime: END_TIME,
-    multiplier: DEFAULT_YEETER_VALUES.multiplier,
-    minThresholdGoal: DEFAULT_GOAL,
-    feeRecipients: DEFAULT_YEETER_VALUES.feeRecipients,
-    feeAmounts: DEFAULT_YEETER_VALUES.feeAmounts,
-    // Meme Yeeter values
-    boostRewardFee: DEFAULT_MEME_YEETER_VALUES.boostRewardFee,
-    poolFee: DEFAULT_MEME_YEETER_VALUES.poolFee,
-    imageUrl: params.imageUrl,
-  }
+    const now = Math.floor(Date.now() / 1000)
+    
+    const daoParams: DaoSummonParams = {
+      name: params.name,
+      description: params.description,
+      tokenConfig: {
+        name: params.tokenName,
+        symbol: params.tokenSymbol,
+      },
+      price: params.price,
+      memberAddress: params.memberAddress,
+      // Use defaults for governance params
+      votingPeriod: DEFAULT_DAO_PARAMS.VOTING_PERIOD,
+      gracePeriod: DEFAULT_DAO_PARAMS.GRACE_PERIOD,
+      proposalOffering: DEFAULT_DAO_PARAMS.PROPOSAL_OFFERING,
+      quorum: DEFAULT_DAO_PARAMS.QUORUM,
+      sponsorThreshold: DEFAULT_DAO_PARAMS.SPONSOR_THRESHOLD,
+      minRetention: DEFAULT_DAO_PARAMS.MIN_RETENTION,
+      // Set time parameters
+      startTime: START_TIME,
+      endTime: END_TIME,
+      multiplier: DEFAULT_YEETER_VALUES.multiplier,
+      minThresholdGoal: DEFAULT_GOAL,
+      feeRecipients: DEFAULT_YEETER_VALUES.feeRecipients,
+      feeAmounts: DEFAULT_YEETER_VALUES.feeAmounts,
+      // Meme Yeeter values
+      boostRewardFee: DEFAULT_MEME_YEETER_VALUES.boostRewardFee,
+      poolFee: DEFAULT_MEME_YEETER_VALUES.poolFee,
+      imageUrl: params.imageUrl,
+    }
 
-  const result = await daoSummoner.createDao(daoParams)
-  
-  if (result.success) {
-    return {
-      success: true,
-      message: `# ${params.tokenSymbol}
+    const result = await daoSummoner.createDao(daoParams)
+    
+    if (result.success) {
+      return {
+        success: true,
+        message: `# ${params.tokenSymbol}
 ### DAO Successfully Created! 🎉
 
 Your DAO is being deployed to Base network. Here's what's happening:
@@ -367,11 +368,14 @@ Your DAO is being deployed to Base network. Here's what's happening:
 - **Indexing**: TheGraph indexers are processing your DAO (usually takes 2-5 years)
 
 [blockexplorer]: ${getBlockExplorerUrl(result.txHash as string)} "View on block explorer"`,
-      txHash: result.txHash
-    };
-  }
+        txHash: result.txHash
+      };
+    }
 
-  throw new Error(result.error || 'Failed to create DAO')
+    throw new Error(result.error || 'Failed to create DAO')
+  } catch (error) {
+    throw error
+  }
 }
 
 async function generateArt(prompt: string): Promise<string> {

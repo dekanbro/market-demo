@@ -1,9 +1,13 @@
 import { base } from 'viem/chains'
 import { CONTRACT_ADDRESSES } from '../wagmi'
 import { BasicHOSSummonerAbi } from './abis/basic-hos-summoner'
-import { agentAccountManager } from './agent-account'
+import { agentAccountManager, checkAgentBalance } from './agent-account'
 import { assembleMemeYeeterSummonerArgs } from './summoning'
-import { type DaoSummonParams, type ISummonerFunctions } from './schemas'
+import { 
+  type DaoSummonParams, 
+  type ISummonerFunctions,
+  type DaoSummonResult 
+} from './schemas'
 import { validateEnvConfig } from './config'
 
 export class DaoSummoner implements ISummonerFunctions {
@@ -12,9 +16,12 @@ export class DaoSummoner implements ISummonerFunctions {
    * @param params - DAO creation parameters
    * @returns Transaction result
    */
-  async createDao(params: DaoSummonParams) {
+  async createDao(params: DaoSummonParams): Promise<DaoSummonResult> {
     console.log("member address from createDao", params.memberAddress);
     try {
+      // Check balance first
+      await checkAgentBalance()
+
       // Validate environment configuration
       validateEnvConfig()
 
@@ -95,6 +102,12 @@ export class DaoSummoner implements ISummonerFunctions {
       }
     } catch (error) {
       console.error('Error creating DAO:', error)
+      if (error instanceof Error && error.message.includes('Agent needs gas')) {
+        return {
+          success: false,
+          error: error.message
+        }
+      }
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'

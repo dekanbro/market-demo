@@ -55,4 +55,10 @@ export interface ISummonerFunctions {
     txHash?: string
     error?: string
   }>
+}
+
+export interface DaoSummonResult {
+  success: boolean;
+  error?: string;
+  txHash?: string;
 } 
