@@ -12,10 +12,10 @@ import { useDaos } from '@/app/hooks/useDaos'
 import { useWallets } from '@privy-io/react-auth'
 import { DEFAULT_CHAIN } from '@/app/lib/constants'
 import { BattleSection } from './BattleSection'
+import { NewsletterSignup } from './NewsletterSignup'
 
 export function HomePage() {
   const { handleProtectedAction } = useProtectedAction()
-  const [selectedBattlers, setSelectedBattlers] = useState<HydratedDaoItem[]>([])
   
   const { wallets } = useWallets()
   const embeddedWallet = wallets.find(wallet => wallet.walletClientType === 'privy')
@@ -26,18 +26,14 @@ export function HomePage() {
   useEffect(() => {
     const featuredDaos = daos.filter(dao => dao.status === 'featured')
     const shuffled = [...featuredDaos].sort(() => Math.random() - 0.5)
-    setSelectedBattlers([
-      shuffled[0],
-      shuffled.find(dao => dao.id !== shuffled[0]?.id) || shuffled[1]
-    ].filter(Boolean))
   }, [daos])
 
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error: {error}</div>
-  if (selectedBattlers.length < 2) return null
 
   return (
     <div className="container mx-auto py-8">
+      <NewsletterSignup />
       <div className="mb-8 text-center">
         <p className="text-lg text-muted-foreground">
           Welcome to the first marketplace where DAOs battle for glory, 
@@ -49,7 +45,8 @@ export function HomePage() {
         </p>
       </div>
 
-      <BattleSection daos={daos} />
+
+      {/* <BattleSection daos={daos} /> */}
 
       <section className="mb-12">
         <h2 className="text-2xl font-bold mb-4">Featured DAOs</h2>

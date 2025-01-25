@@ -2,7 +2,9 @@
 
 import { HydratedDaoItem } from '@/app/lib/types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { addons } from '@/app/data/addons'
 import {
   LineChart,
   Line,
@@ -24,10 +26,9 @@ const mockData = [
 export function DaoTabs({ dao }: { dao: HydratedDaoItem }) {
   return (
     <Tabs defaultValue="chart" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="chart">Chart</TabsTrigger>
-        <TabsTrigger value="proposals">Proposals</TabsTrigger>
-        <TabsTrigger value="members">Members</TabsTrigger>
+        <TabsTrigger value="addons">Operator Addons</TabsTrigger>
       </TabsList>
       <TabsContent value="chart">
         <Card className="p-6">
@@ -80,15 +81,30 @@ export function DaoTabs({ dao }: { dao: HydratedDaoItem }) {
           </div>
         </Card>
       </TabsContent>
-      <TabsContent value="proposals">
-        <Card className="p-4">
-          <p className="text-muted-foreground">Proposals coming soon...</p>
-        </Card>
-      </TabsContent>
-      <TabsContent value="members">
-        <Card className="p-4">
-          <p className="text-muted-foreground">Member list coming soon...</p>
-        </Card>
+      <TabsContent value="addons">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {addons.map((addon) => (
+            <Card key={addon.id} className="relative overflow-hidden group">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">{addon.title}</CardTitle>
+                  <Badge variant="secondary">
+                    {addon.price} ETH/{addon.billingPeriod}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{addon.description}</p>
+                <div className="mt-4">
+                  <Badge variant="outline" className="bg-blue-500/10 text-blue-500">
+                    {addon.type}
+                  </Badge>
+                </div>
+              </CardContent>
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-pink-500/0 to-purple-500/0 opacity-0 group-hover:opacity-10 transition-opacity" />
+            </Card>
+          ))}
+        </div>
       </TabsContent>
     </Tabs>
   )
