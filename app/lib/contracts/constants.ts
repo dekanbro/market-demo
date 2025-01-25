@@ -11,12 +11,12 @@ export const DEFAULT_DAO_PARAMS = {
 } as const
 
 // Time
-export const DEFAULT_START_DATE_OFFSET = 600 // 10 minutes
-export const DEFAULT_DURATION = 1800 // 30 minutes
+export const DEFAULT_START_DATE_OFFSET = 3600 // 1 hour
+export const DEFAULT_DURATION = 3600 // 1 hour
 
 // Shaman permissions
-export const MM_SHAMAN_PERMISSIONS = '3' // No permissions
-export const YEET_SHAMAN_PERMISSIONS = '2' // Full permissions (manage + admin)
+export const MM_SHAMAN_PERMISSIONS = '3' // Admin/Manage permissions
+export const YEET_SHAMAN_PERMISSIONS = '2' // Manage permissions
 
 // Default values for different summoner types
 export const DEFAULT_YEETER_VALUES = {
