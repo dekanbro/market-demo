@@ -15,6 +15,7 @@ const PUBLIC_ROUTES = [
   '/api/dao/:id',
   '/api/image-proxy',
   '/api/dao/balance/:address',
+  '/api/subscribe',
 ]
 
 // Helper to check if route is public

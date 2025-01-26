@@ -33,17 +33,24 @@ export function HomePage() {
 
   return (
     <div className="container mx-auto py-8">
-      <NewsletterSignup />
       <div className="mb-8 text-center">
         <p className="text-lg text-muted-foreground">
-          Welcome to the first marketplace where DAOs battle for glory, 
-          creators earn <span className="text-primary font-semibold">66.6%</span> of LP fees, 
-          and the community decides who rules supreme. 
+          Welcome to the first ILO launcher and marketplace where tokens have teeth, 
+          creators earn{' '}
+          <Link 
+            href="/about" 
+            className="text-primary hover:text-primary/80 underline underline-offset-4 font-semibold"
+          >
+            66.6%
+          </Link>
+          {' '}of LP fees, 
+          and the community decides who rules supreme.
           <Link href="/about" className="text-primary hover:text-primary/80 ml-2 underline underline-offset-4">
             Learn how it works →
           </Link>
         </p>
       </div>
+      <NewsletterSignup />
 
 
       {/* <BattleSection daos={daos} /> */}
