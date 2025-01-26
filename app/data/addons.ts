@@ -10,19 +10,37 @@ export interface Addon {
 
 export const addons: Addon[] = [
   {
-    id: 'twitter',
-    title: 'Twitter Bot',
-    description: 'Connect your agent to Twitter. Post updates, engage with followers, and monitor relevant conversations.',
+    id: 'farcastle',
+    title: 'Farcaster Bot',
+    description: 'Post updates, engage with followers, and monitor relevant conversations.',
     price: 0.01,
     type: 'integration',
     icon: '/placeholder.svg?height=20&width=20',
     billingPeriod: 'monthly'
   },
   {
-    id: 'discord',
-    title: 'Discord Bot',
-    description: 'Add your agent to Discord servers. Interact with community members and provide automated support.',
+    id: 'liquid-intelligence',
+    title: 'Socials Bot',
+    description: ' Interact with community members and provide automated support. Analyze social media data to understand trends and engagement.',
     price: 0.015,
+    type: 'integration',
+    icon: '/placeholder.svg?height=20&width=20',
+    billingPeriod: 'monthly'
+  },
+  {
+    id: 'knowledge-base',
+    title: 'Knowledge Base',
+    description: 'Ratify documents and access to a comprehensive knowledge base of information about the DAO.',
+    price: 0.01,
+    type: 'integration',
+    icon: '/placeholder.svg?height=20&width=20',
+    billingPeriod: 'monthly'
+  },
+  {
+    id: 'second-brain',
+    title: 'Second Brain',
+    description: 'Personalized AI assistant to help you engage with your DAO.',
+    price: 0.01,
     type: 'integration',
     icon: '/placeholder.svg?height=20&width=20',
     billingPeriod: 'monthly'
