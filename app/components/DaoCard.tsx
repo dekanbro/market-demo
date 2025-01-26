@@ -31,19 +31,19 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
       <Link href={`/dao/${dao.id}`} onClick={handleNavigate} className="block">
         <div className="relative aspect-[4/3]">
           <Image
-            src={dao.profile?.avatarImg || '/placeholder.svg'}
+            src={dao.profile?.avatarImg || '/herotry1.png'}
             alt={dao.name}
             fill
             className={cn(
               "object-cover",
-              (!dao.profile?.avatarImg || dao.profile.avatarImg === '/placeholder.svg') && 
-                "dark:brightness-[0.8] dark:opacity-75"
+              (!dao.profile?.avatarImg || dao.profile.avatarImg === '/herotry1.png') && 
+                "dark:brightness-[0.2] dark:opacity-95"
             )}
             onError={(e) => {
               const img = e.currentTarget as HTMLImageElement;
-              if (img.src !== '/placeholder.svg') {
-                img.src = '/placeholder.svg';
-                img.classList.add('dark:brightness-[0.8]', 'dark:opacity-75');
+              if (img.src !== '/herotry1.png') {
+                img.src = '/herotry1.png';
+                img.classList.add('dark:brightness-[0.2]', 'dark:opacity-95');
               }
             }}
           />

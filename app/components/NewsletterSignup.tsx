@@ -46,13 +46,15 @@ export function NewsletterSignup() {
                 style={{ backgroundImage: 'url(/herotry1.png)' }}
             />
             <div className="relative">
-                <div className="flex flex-col items-center text-center space-y-4 mb-6">
-                    <h2 className="text-3xl font-bold tracking-tighter">
+                <div className="flex flex-col space-y-4 mb-6 max-w-2xl">
+                    <h2 className="text-3xl font-bold tracking-tighter text-primary drop-shadow-sm">
                         Join the Revolution
                     </h2>
-                    <p className="text-muted-foreground max-w-[600px]">
-                        Discover the ILO Market: A glimpse into the power of HAUSOS and Vertical DAO Agents. 
-                        Stay in the loop on cutting-edge features like Liquid Intelligence, Second Brain, and Farcastle. 
+                    <p className="text-muted-foreground font-medium drop-shadow-sm">
+                        We are rethinging DAOS from the ground up: A glimpse into the power of HAUSOS and Vertical DAO Agents. 
+                        Stay in the loop on cutting-edge features like Liquid Intelligence, Second Brain, and Farcastle.
+                    </p>
+                    <p className="text-muted-foreground font-medium drop-shadow-sm">
                         Subscribe now for exclusive updates on ILO Market innovations, presale launches, Talk-to-DAO interfaces, DAO Battles, more dao configurations, and community events. 
                         Be the first to meet the next wave of Super Agents and shape the future of DAO engagement.
                     </p>
@@ -60,7 +62,7 @@ export function NewsletterSignup() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
+                    className="flex flex-col sm:flex-row gap-4 max-w-md mb-6"
                 >
                     <Input
                         type="email"
@@ -97,7 +99,7 @@ export function NewsletterSignup() {
                     <p className="text-red-500 text-sm text-center mt-2">{error}</p>
                 )}
 
-                <div className="mt-6 flex justify-center gap-8 text-sm text-muted-foreground">
+                <div className="flex gap-8 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-green-500" />
                         Alpha Access
