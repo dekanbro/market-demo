@@ -1,5 +1,5 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Inter, Montserrat } from 'next/font/google'
 import Link from 'next/link'
 import { ThemeProvider } from '@/components/theme-provider'
 import { DarkModeToggle } from '@/components/dark-mode-toggle'
@@ -10,6 +10,10 @@ import Image from 'next/image'
 import { Providers } from './components/Providers'
 
 const inter = Inter({ subsets: ['latin'] })
+const montserrat = Montserrat({ 
+  subsets: ['latin'],
+  variable: '--font-montserrat'
+})
 
 export const metadata = {
   title: 'Agent Marketplace',
@@ -23,7 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen flex flex-col`}>
+      <body className={`${inter.className} ${montserrat.variable} font-sans min-h-screen flex flex-col`}>
         <ThemeProvider 
           attribute="class" 
           defaultTheme="dark" 
@@ -33,7 +37,7 @@ export default function RootLayout({
           <Providers>
             <div className="relative w-full h-[200px] md:h-[200px]">
               <Image
-                src="/marketheader.png"
+                src="/header-try1.jpg"
                 alt="Agent Market Banner"
                 fill
                 className="object-cover"
@@ -42,8 +46,11 @@ export default function RootLayout({
               <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/80" />
               <header className="absolute top-0 w-full">
                 <div className="container mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center">
-                  <Link href="/" className="text-2xl font-bold text-primary mb-4 sm:mb-0 drop-shadow-md">
-                    Agent Market
+                  <Link href="/" className="text-2xl font-bold text-primary mb-4 sm:mb-0">
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">ILO LAUNCHER</span>
+                      <span className="text-5xl text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">Agent Market</span>
+                    </div>
                   </Link>
                   <nav className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 bg-background/95 backdrop-blur-sm px-4 py-2 w-full sm:w-auto sm:rounded-full">
                     <ul className="flex space-x-4">

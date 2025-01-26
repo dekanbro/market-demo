@@ -41,7 +41,10 @@ export function NewsletterSignup() {
 
     return (
         <section className="relative overflow-hidden rounded-lg border bg-background p-8 mb-12">
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 via-pink-500/10 to-purple-500/10" />
+            <div 
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+                style={{ backgroundImage: 'url(/herotry1.png)' }}
+            />
             <div className="relative">
                 <div className="flex flex-col items-center text-center space-y-4 mb-6">
                     <h2 className="text-3xl font-bold tracking-tighter">

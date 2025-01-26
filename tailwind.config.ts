@@ -1,12 +1,22 @@
 import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config: Config = {
     content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    './pages/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   darkMode: ["class"],
   theme: {
+  	container: {
+  		center: true,
+  		padding: "2rem",
+  		screens: {
+  			"2xl": "1400px",
+  		},
+  	},
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',
@@ -105,6 +115,10 @@ const config: Config = {
   					},
   				},
   			},
+  		},
+  		fontFamily: {
+  			sans: ['var(--font-montserrat)', ...fontFamily.sans],
+  			montserrat: ['var(--font-montserrat)'],
   		},
   	}
   },
