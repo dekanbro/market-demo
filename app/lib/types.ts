@@ -112,4 +112,7 @@ export interface YeeterData {
   balance: string;
   yeetCount: string;
   vault: string;
+  dao: {
+    id: string;
+  };
 }

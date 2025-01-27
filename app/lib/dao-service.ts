@@ -1,6 +1,6 @@
 import { getGraphClient } from './graphql'
 import { gql } from 'graphql-request'
-import { DaoItem, DaoQueryResponse, DaoResponse, DaoStatus, DaoType, HydratedDaoItem } from './types'
+import { DaoItem, DaoQueryResponse, DaoResponse, DaoStatus, DaoType, HydratedDaoItem, YeeterData } from './types'
 import { CHAIN_ID, DEFAULT_DAO_DATE, GRAPH, FEATURED_DAOS, SUPER_AGENTS, REFERRER, SPECIAL_DAOS } from './constants'
 
 
@@ -156,7 +156,7 @@ const queries = {
     query getFeaturedAndRecentDaos(
       $ids: [ID!]!
       $skip: Int = 0 
-      $first: Int = 200
+      $first: Int = 1000
       $orderBy: String = "createdAt"
       $orderDirection: String = "desc"
       $createdAfter: String
@@ -220,6 +220,14 @@ export const GET_YEETER = gql`
     }
   }
 `;
+
+export const GET_YEETER_BY_DAO_IDs = gql`
+  query getYeeterByDaoIds($ids: [ID!]!) {
+    yeeters(where: { dao_: { id_in: $ids } }) {
+      ${yeeterFields}
+    }
+  }
+`
 
 export const GET_YEETERS = gql`
   {
@@ -324,11 +332,11 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     const startTime = parseInt(dao.yeeterData.startTime) * 1000
     const endTime = parseInt(dao.yeeterData.endTime) * 1000
     const twoDaysFromNow = now + (2 * 24 * 60 * 60 * 1000)
+    // const price = dao.yeeterData.price
     
     comingSoon = startTime > now && startTime <= twoDaysFromNow
     isPresale = now >= startTime && now < endTime
   }
-
 
   return {
     ...dao,
@@ -526,16 +534,27 @@ export async function fetchCombinedDaos({
 export async function fetchFeaturedAndRecentDaos({ 
   chainId = CHAIN_ID.BASE,
   filter,
-  featuredIds = [],
+  featuredIds,
   first = 100,
   createdAfter = DEFAULT_DAO_DATE
-}: DaoQueryParams): Promise<{ daos: HydratedDaoItem[]; error: string | null; loading: boolean }> {
+}: {
+  chainId?: string
+  filter?: string
+  featuredIds: string[]
+  first?: number
+  createdAfter?: string
+}): Promise<DaoResponse> {
   try {
-    // Create clients for each chain
     const baseClient = getGraphClient({
       chainId: CHAIN_ID.BASE,
       graphKey: process.env.GRAPH_API_KEY!,
       subgraphKey: GRAPH.SUBGRAPH_KEYS.DAOHAUS
+    })
+
+    const yeeterClient = getGraphClient({
+      chainId: CHAIN_ID.BASE,
+      graphKey: process.env.GRAPH_API_KEY!,
+      subgraphKey: GRAPH.SUBGRAPH_KEYS.YEETER
     })
 
     const gnosisClient = getGraphClient({
@@ -544,13 +563,13 @@ export async function fetchFeaturedAndRecentDaos({
       subgraphKey: GRAPH.SUBGRAPH_KEYS.DAOHAUS
     })
 
-    // Query both chains
+    // Query both chains and yeeter data
     const [baseData, gnosisData] = await Promise.all([
       baseClient.request<{
         featured: DaoItem[];
         recent: DaoItem[];
       }>(queries.getFeaturedAndRecentDaos, { 
-        ids: featuredIds.filter(id => !id.includes('0x64')), // Base chain IDs
+        ids: featuredIds.filter(id => !id.includes('0x64')),
         first,
         createdAfter
       }),
@@ -558,18 +577,34 @@ export async function fetchFeaturedAndRecentDaos({
         daos: DaoItem[];
       }>(queries.getDaosByIds, { 
         ids: SPECIAL_DAOS.GNOSIS.map(dao => dao.id)
-      })
+      }),
     ])
 
-    // Combine DAOs from both chains
+    const yeeterData = await yeeterClient.request<{
+      yeeters: YeeterData[];
+    }>(GET_YEETER_BY_DAO_IDs, {
+      ids: [...baseData.featured.map(dao => dao.id), ...baseData.recent.map(dao => dao.id)]
+    })
+
+    console.log("********", yeeterData)
+
+    // Create a map of yeeter data by DAO ID
+    const yeeterDataMap = new Map(
+      yeeterData.yeeters.map(yeeter => [yeeter.dao.id, yeeter])
+    )
+
+    // Combine DAOs from both chains and add yeeter data
     let allDaos = [
-      ...baseData.featured, 
+      ...baseData.featured,
       ...baseData.recent,
       ...gnosisData.daos.map(dao => ({
         ...dao,
         chainId: CHAIN_ID.GNOSIS
       }))
-    ]
+    ].map(dao => ({
+      ...dao,
+      yeeterData: yeeterDataMap.get(dao.id) || null
+    }))
 
     // Apply text filter if provided
     if (filter) {
@@ -602,19 +637,6 @@ export async function fetchFeaturedAndRecentDaos({
       loading: false
     }
   }
-}
-
-interface YeeterData {
-  id: string;
-  endTime: string;
-  startTime: string;
-  isShares: boolean;
-  multiplier: string;
-  minTribute: string;
-  goal: string;
-  balance: string;
-  yeetCount: string;
-  vault: string;
 }
 
 export async function getDaoById(id: string, chainId: string = CHAIN_ID.BASE): Promise<HydratedDaoItem | null> {
@@ -656,6 +678,8 @@ export async function getDaoById(id: string, chainId: string = CHAIN_ID.BASE): P
       GET_YEETER,
       { daoId: id }
     );
+
+    console.log("******** yeeterData", yeeterData)
 
     const hydratedDao = hydrateDaoData({
       ...daoWithChain,

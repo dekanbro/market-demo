@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 export function DaoHeader({ dao }: { dao: HydratedDaoItem }) {
+  console.log("********", dao)
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">

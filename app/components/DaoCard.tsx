@@ -20,7 +20,6 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
     setIsLoading(true)
     router.push(`/dao/${dao.id}`)
   }
-
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow relative">
       {isLoading && (
@@ -36,8 +35,8 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
             fill
             className={cn(
               "object-cover",
-              (!dao.profile?.avatarImg || dao.profile.avatarImg === '/herotry1.png') && 
-                "dark:brightness-[0.2] dark:opacity-95"
+              (!dao.profile?.avatarImg || dao.profile.avatarImg === '/herotry1.png') &&
+              "dark:brightness-[0.2] dark:opacity-95"
             )}
             onError={(e) => {
               const img = e.currentTarget as HTMLImageElement;
@@ -55,34 +54,43 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
             )}
           </div>
           <div className="absolute top-2 right-2 flex gap-2">
-          {dao.isSpecialDao ? (
-            <Badge 
-              variant="outline" 
-              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
-            >
-              Notable DAO
-            </Badge>
-          ) : (
-            <Badge 
-              variant="outline" 
-              className={cn(
-                "border-2",
-                {
-                  "border-green-500 bg-green-500/20 backdrop-blur-sm text-green-500 dark:bg-green-950/60 dark:text-green-400": dao.status === "featured",
-                  "border-blue-500 bg-blue-500/20 backdrop-blur-sm text-blue-500 dark:bg-blue-950/60 dark:text-blue-400": dao.status === "active",
-                  "border-gray-500 bg-gray-500/20 backdrop-blur-sm text-gray-500 dark:bg-gray-950/60 dark:text-gray-400": dao.status === "failed"
-                }
-              )}
-            >
-              {dao.status}
-            </Badge>)}
+            {dao.isSpecialDao ? (
+              <Badge 
+                variant="outline"
+                className="bg-primary/90 text-primary-foreground border-primary/20 font-medium"
+              >
+                Notable DAO
+              </Badge>
+            ) : !dao.comingSoon && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "border font-medium backdrop-blur-sm",
+                  {
+                    "bg-green-600/90 text-white border-green-500/30": dao.status === "featured",
+                    "bg-blue-600/90 text-white border-blue-500/30": dao.status === "active",
+                    "bg-gray-600/90 text-white border-gray-500/30": dao.status === "failed"
+                  }
+                )}
+              >
+                {dao.status}
+              </Badge>
+            )}
+
             {dao.isPresale && (
-              <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">
+              <Badge 
+                variant="secondary"
+                className="bg-green-600/90 text-white border-green-500/30 font-medium"
+              >
                 Presale Active
               </Badge>
             )}
+            
             {!dao.isPresale && dao.comingSoon && (
-              <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+              <Badge 
+                variant="secondary"
+                className="bg-blue-600/90 text-white border-blue-500/30 font-medium"
+              >
                 Coming Soon
               </Badge>
             )}

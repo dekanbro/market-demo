@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2, Send, Trash2 } from 'lucide-react';
 
 const IMAGE_SOURCES = {
   DALLE: 'oaidalleapiprodscus.blob.core.windows.net',
@@ -79,11 +80,12 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState('');
   const { messages, sendMessage, isLoading, clearHistory } = useChat(itemId, initialMessage);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -103,78 +105,70 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
   }
 
   return (
-    <Card className="w-full h-full flex flex-col">
-      <CardHeader className="p-4 flex flex-row items-center justify-between shrink-0">
-        <CardTitle className="text-lg">Chat with {agentName}</CardTitle>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-4 py-2 border-b">
+        <h2 className="font-semibold">Chat History</h2>
         <Button 
           variant="ghost" 
           size="sm"
           onClick={clearHistory}
-          disabled={messages.length === 1 || isLoading}
+          className="text-muted-foreground hover:text-destructive"
         >
-          Clear Chat
+          <Trash2 className="h-4 w-4" />
         </Button>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-hidden p-4">
-        <ScrollArea className="h-full pr-2">
-          <div className="space-y-4">
-            {messages.map((message, index) => (
-              <div key={index} className={`flex ${message.user === 'You' ? 'justify-end' : 'justify-start'}`}>
-                <div className="flex items-start gap-2 max-w-[85%] sm:max-w-[80%]">
-                  {message.user !== 'You' && (
-                    <UserProfile 
-                      address={itemId}
-                      showName={false}
-                      size="sm"
-                      isAgent={true}
-                      agentName={agentName}
-                    />
-                  )}
-                  <div className={cn(
-                    "rounded-lg px-3 py-2 text-sm sm:text-base",
-                    message.user === 'You' ? "bg-primary text-primary-foreground" : getMessageStyles(message.message)
-                  )}>
-                    {renderMessageContent(message.message)}
-                    {message.data && (
-                      <p className="text-xs mt-1 opacity-70 break-all">
-                        {JSON.stringify(message.data)}
-                      </p>
-                    )}
-                  </div>
-                  {message.user === 'You' && (
-                    <UserProfile 
-                      address={user?.wallet?.address}
-                      showName={false}
-                      size="sm"
-                    />
-                  )}
-                </div>
+      </div>
+
+      <ScrollArea ref={scrollRef} className="flex-1 p-4">
+        <div className="space-y-4">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${
+                message.user === 'You' ? 'justify-end' : 'justify-start'
+              }`}
+            >
+              <div
+                className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                  message.user === 'You'
+                    ? 'bg-primary text-primary-foreground'
+                    : getMessageStyles(message.message)
+                }`}
+              >
+                {renderMessageContent(message.message)}
+                {message.data && (
+                  <p className="text-xs mt-1 opacity-70 break-all">
+                    {JSON.stringify(message.data)}
+                  </p>
+                )}
               </div>
-            ))}
-            {isLoading && (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[200px]" />
-                <Skeleton className="h-4 w-[160px]" />
+            </div>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="rounded-lg px-4 py-2 max-w-[80%] bg-muted">
+                <Loader2 className="h-4 w-4 animate-spin" />
               </div>
-            )}
-            <div ref={scrollRef} />
-          </div>
-        </ScrollArea>
-      </CardContent>
-      <CardFooter className="p-4 pt-2 shrink-0">
-        <form onSubmit={handleSubmit} className="flex w-full gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 text-sm sm:text-base"
-            disabled={isLoading}
-          />
-          <Button type="submit" disabled={isLoading} size="sm" className="whitespace-nowrap">
-            {isLoading ? 'Sending...' : 'Send'}
-          </Button>
-        </form>
-      </CardFooter>
-    </Card>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+
+      <form
+        onSubmit={handleSubmit}
+        className="border-t p-4 flex items-center gap-4"
+      >
+        <Input
+          ref={inputRef}
+          placeholder="Type a message..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-1"
+          disabled={isLoading}
+        />
+        <Button type="submit" size="icon" disabled={isLoading}>
+          <Send className="h-4 w-4" />
+        </Button>
+      </form>
+    </div>
   );
 } 

@@ -1,7 +1,7 @@
 import { base } from 'viem/chains'
 import { CONTRACT_ADDRESSES } from '../wagmi'
 import { BasicHOSSummonerAbi } from './abis/basic-hos-summoner'
-import { agentAccountManager, checkAgentBalance } from './agent-account'
+import { AgentAccountManager, agentAccountManager, checkAgentBalance } from './agent-account'
 import { assembleMemeYeeterSummonerArgs } from './summoning'
 import { 
   type DaoSummonParams, 
@@ -11,6 +11,22 @@ import {
 import { validateEnvConfig } from './config'
 
 export class DaoSummoner implements ISummonerFunctions {
+  private agentAccount: AgentAccountManager;
+
+  constructor() {
+    this.agentAccount = agentAccountManager;
+    // Initialize on construction
+    this.initializeAgent().catch(console.error);
+  }
+
+  private async initializeAgent() {
+    try {
+      await this.agentAccount.initialize();
+    } catch (error) {
+      console.error('Failed to initialize agent account:', error);
+    }
+  }
+
   /**
    * Creates a new DAO with the given parameters
    * @param params - DAO creation parameters
@@ -22,11 +38,13 @@ export class DaoSummoner implements ISummonerFunctions {
       // Check balance first
       await checkAgentBalance()
 
+      // Ensure agent is initialized
+      if (!this.agentAccount.getAccount()) {
+        await this.initializeAgent();
+      }
+
       // Validate environment configuration
       validateEnvConfig()
-
-      // Initialize agent account
-      await agentAccountManager.initialize()
 
       // Convert params to expected format
       const daoParams = {
@@ -81,7 +99,7 @@ export class DaoSummoner implements ISummonerFunctions {
       console.log("salt nonce", saltNonce);
 
       // Send transaction
-      const receipt = await agentAccountManager.sendAndMonitorTransaction({
+      const receipt = await this.agentAccount.sendAndMonitorTransaction({
         address: CONTRACT_ADDRESSES[base.id].YEET24_SUMMONER,
         abi: BasicHOSSummonerAbi,
         functionName: 'summonBaalFromReferrer',
@@ -92,7 +110,7 @@ export class DaoSummoner implements ISummonerFunctions {
           initActions,
           saltNonce,
         ],
-        account: agentAccountManager.getAccount(),
+        account: this.agentAccount.getAccount(),
         chain: base
       })
 

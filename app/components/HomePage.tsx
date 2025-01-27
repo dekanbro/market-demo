@@ -13,14 +13,27 @@ import { useWallets } from '@privy-io/react-auth'
 import { DEFAULT_CHAIN } from '@/app/lib/constants'
 import { BattleSection } from './BattleSection'
 import { NewsletterSignup } from './NewsletterSignup'
+import { DaoFilter, FilterType } from './DaoFilter'
 
 export function HomePage() {
   const { handleProtectedAction } = useProtectedAction()
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   
   const { wallets } = useWallets()
   const embeddedWallet = wallets.find(wallet => wallet.walletClientType === 'privy')
   const { daos, error, loading } = useDaos({
     chainId: embeddedWallet?.chainId || DEFAULT_CHAIN.id
+  })
+
+  const filteredDaos = daos.filter(dao => {
+    switch (activeFilter) {
+      case 'coming-soon':
+        return dao.comingSoon
+      case 'presale':
+        return dao.isPresale
+      default:
+        return true
+    }
   })
 
   useEffect(() => {
@@ -69,12 +82,24 @@ export function HomePage() {
       </section>
 
       <section>
-        <h2 className="text-2xl font-bold mb-4">All DAOs</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">All DAOs</h2>
+          <DaoFilter 
+            daos={daos}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {daos.map((dao) => (
+          {filteredDaos.map((dao) => (
             <DaoCard key={dao.id} dao={dao} />
           ))}
         </div>
+        {filteredDaos.length === 0 && (
+          <div className="text-center text-muted-foreground py-12">
+            No DAOs found for the selected filter
+          </div>
+        )}
       </section>
     </div>
   )

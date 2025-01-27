@@ -1,6 +1,6 @@
 'use client'
 
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { ChatWindow } from '@/app/components/ChatWindow'
 
 interface DaoChatDrawerProps {
@@ -17,6 +17,12 @@ export function DaoChatDrawer({ open, onClose, title, daoId }: DaoChatDrawerProp
         side="bottom" 
         className="h-[85%] p-0 sm:h-[85%]"
       >
+        <div className="px-4 py-2">
+          <SheetTitle>Chat with {title}</SheetTitle>
+          <SheetDescription>
+            Have a conversation with the {title} DAO. Ask about proposals, members, or general information.
+          </SheetDescription>
+        </div>
         <ChatWindow 
           agentName={title}
           itemId={daoId}
