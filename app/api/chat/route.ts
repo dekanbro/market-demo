@@ -6,8 +6,12 @@ import { AGENT_IDS } from '@/app/lib/constants'
 
 export const runtime = 'edge';
 
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY!,
+// });
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
+  apiKey: process.env.VENICE_API_KEY!,
+  baseURL: "https://api.venice.ai/api/v1",
 });
 
 export async function POST(req: Request) {
@@ -38,6 +42,7 @@ export async function POST(req: Request) {
 
   const stream = await openai.chat.completions.create({
     model: 'gpt-4-turbo-preview',
+    // model: "default",
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: `Connected Wallet/Member Address: ${walletAddress}` },
@@ -82,7 +87,9 @@ export async function POST(req: Request) {
                   currentToolCall.function.name,
                   args
                 );
-                controller.enqueue(new TextEncoder().encode(result));
+                if (result) {
+                  controller.enqueue(new TextEncoder().encode(result));
+                }
                 processedCalls.add(callId);
               } catch (error) {
                 if (error instanceof SyntaxError) {

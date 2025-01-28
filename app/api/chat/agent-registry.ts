@@ -383,6 +383,10 @@ async function generateArt(prompt: string): Promise<string> {
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY!
     });
+    // const openai = new OpenAI({
+    //   apiKey: process.env.VENICE_API_KEY!,
+    //   baseURL: "https://api.venice.ai/api/v1",
+    // });
 
     const response = await openai.images.generate({
       model: "dall-e-3",
@@ -486,9 +490,14 @@ async function analyzeResponse(params: { response: string, question: string }) {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY!
   })
+  // const openai = new OpenAI({
+  //   apiKey: process.env.VENICE_API_KEY!,
+  //   baseURL: "https://api.venice.ai/api/v1",
+  // });
 
   const response = await openai.chat.completions.create({
     model: "gpt-4-turbo-preview",
+    // model: "default",
     messages: [
       {
         role: "system",

@@ -312,7 +312,7 @@ export function shamanModuleConfigTx(
       "shamanModuleConfigTX received arguments in the wrong shape or type"
     );
   }
-
+  console.log("calculatedShamanAddress", calculatedShamanAddress);
   const addModule = encodeFunctionData({
     abi: SafeL2Abi,
     functionName: "enableModule",
@@ -772,8 +772,10 @@ export async function assembleMemeYeeterSummonerArgs(
       shamanPermissions: BigInt(mmShamanPermission),
       shamanTemplate: mmShamanSingleton as Address,
     });
+    console.log("daoAddress from calculateMemeShamanAddress", daoAddress);
+    console.log("shamanSaltNonce from calculateMemeShamanAddress", shamanSaltNonce);
     const shamanAddress = await calculateMemeShamanAddress(shamanSaltNonce);
-
+    console.log("shamanAddress from calculateMemeShamanAddress", shamanAddress);
     const yeeterShamanParams = assembleYeeterShamanParams(
       shamanAddress,
       yeeterConfig
@@ -793,13 +795,6 @@ export async function assembleMemeYeeterSummonerArgs(
       [shamanSingletons, shamanPermissions, shamanInitParams]
     ) as `0x${string}`
   
-
-    //
-
-    // const shamanParams = assembleShamanParams(daoAddress, yeeterConfig);
-
-
-
 
 
     if (!isEthAddress(shamanAddress).isValid) {

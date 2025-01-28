@@ -570,7 +570,7 @@ export async function fetchFeaturedAndRecentDaos({
         recent: DaoItem[];
       }>(queries.getFeaturedAndRecentDaos, { 
         ids: featuredIds.filter(id => !id.includes('0x64')),
-        first,
+        // first,
         createdAfter
       }),
       gnosisClient.request<{
