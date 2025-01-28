@@ -4,10 +4,13 @@ import { formatEther } from 'viem'
 
 export async function GET(
   request: Request,
-  { params }: { params: { address: string, chainId: string } }
+  { params }: { params: { address: string } }
 ) {
   try {
-    const balance = await publicClient(params.chainId).getBalance({ 
+    const { searchParams } = new URL(request.url)
+    const chainId = searchParams.get('chainId')
+    
+    const balance = await publicClient(chainId || undefined).getBalance({ 
       address: params.address as `0x${string}` 
     })
     

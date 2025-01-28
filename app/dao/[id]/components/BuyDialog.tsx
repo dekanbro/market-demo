@@ -18,6 +18,7 @@ import { usePrivy, useActiveWallet, useWallets } from '@privy-io/react-auth'
 import { toast } from "sonner"
 import { yeeterAbi } from "@/app/lib/contracts/abis"
 import { base } from "viem/chains" // replace with your chain
+import { useEthBalance } from '@/app/hooks/useEthBalance'
 
 interface BuyDialogProps {
   dao: HydratedDaoItem
@@ -30,6 +31,7 @@ export function BuyDialog({ dao }: BuyDialogProps) {
   const [message, setMessage] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { refetch: refetchBalance } = useEthBalance(dao.yeeterData?.vault)
 
   const presetAmounts = useMemo(() => {
     if (!dao.yeeterData?.minTribute) return []
@@ -94,6 +96,12 @@ export function BuyDialog({ dao }: BuyDialogProps) {
 
       toast.success('Transaction submitted')
       setIsOpen(false)
+      
+      // Wait a bit for the transaction to be mined and then refetch the balance
+      setTimeout(() => {
+        refetchBalance()
+      }, 5000)
+
     } catch (error) {
       console.error('Transaction failed:', error)
       toast.error('Transaction failed')

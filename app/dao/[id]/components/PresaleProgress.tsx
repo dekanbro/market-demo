@@ -3,6 +3,7 @@
 import { useEthBalance } from '@/app/hooks/useEthBalance'
 import { Progress } from '@/components/ui/progress'
 import { formatEther } from 'viem'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface PresaleProgressProps {
   vaultAddress: string
@@ -10,9 +11,23 @@ interface PresaleProgressProps {
 }
 
 export function PresaleProgress({ vaultAddress, goal }: PresaleProgressProps) {
-  const { balance, isLoading } = useEthBalance(vaultAddress)
+  const { balance, isLoading, error } = useEthBalance(vaultAddress)
   
   if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-2 w-full" />
+        <div className="flex justify-between">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    console.error('Balance fetch error:', error)
     return <Progress value={0} className="w-full" />
   }
 

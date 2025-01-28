@@ -535,7 +535,7 @@ export async function fetchFeaturedAndRecentDaos({
   chainId = CHAIN_ID.BASE,
   filter,
   featuredIds,
-  first = 100,
+  first = 200,
   createdAfter = DEFAULT_DAO_DATE
 }: {
   chainId?: string

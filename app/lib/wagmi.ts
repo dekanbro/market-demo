@@ -78,3 +78,6 @@ export const CHAIN_CONFIG = {
     SAFE_L2: true,
   }
 } as const 
+
+// locker 0xCFcf187F6A5cF5E7cdF52E7e1EBaE1970E38a6F0
+// MM 0x088c48a05C3d7A5C3F019C1CbD16873d64D6d839

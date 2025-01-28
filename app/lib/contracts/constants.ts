@@ -11,8 +11,8 @@ export const DEFAULT_DAO_PARAMS = {
 } as const
 
 // Time
-export const DEFAULT_START_DATE_OFFSET = 360 // 1 hour
-export const DEFAULT_DURATION = 360 // 1 hour
+export const DEFAULT_START_DATE_OFFSET = 3600 / 10 // 1 hour / 10
+export const DEFAULT_DURATION = 3600 / 2 // 1 hour / 2
 
 // Shaman permissions
 export const MM_SHAMAN_PERMISSIONS = '3' // Admin/Manage permissions

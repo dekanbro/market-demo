@@ -110,6 +110,7 @@ export class AgentAccountManager {
       const receipt = await this.publicClient.waitForTransactionReceipt({
         hash,
         confirmations,
+        timeout: 60_000, // 60 seconds timeout
         onReplaced: (replacement) => {
           if (replacement.reason === 'replaced') {
             console.warn('Transaction was replaced:', {
@@ -134,8 +135,17 @@ export class AgentAccountManager {
 
       return receipt
     } catch (error) {
+      // Check if it's a timeout error
+      if (error instanceof Error && error.message.includes('timeout')) {
+        console.warn('Transaction monitoring timed out but transaction may still succeed:', hash)
+        throw new Error(
+          `Transaction submitted (${hash}) but taking longer than expected to confirm. ` +
+          `You can check the status on the block explorer. The transaction may still succeed.`
+        )
+      }
+      
       console.error('Error monitoring transaction:', error)
-      throw new Error(`Transaction monitoring failed: ${error instanceof Error ? error.message : 'unknown error'}`)
+      throw new Error(`Transaction failed: ${error instanceof Error ? error.message : 'unknown error'}`)
     }
   }
 
