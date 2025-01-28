@@ -43,7 +43,7 @@ export function NewsletterSignup() {
         <section className="relative overflow-hidden rounded-lg border bg-background p-8 mb-12">
             <div 
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
-                style={{ backgroundImage: 'url(/herotry1.png)' }}
+                style={{ backgroundImage: 'url(/road.png)' }}
             />
             <div className="relative">
                 <div className="flex flex-col space-y-4 mb-6 max-w-2xl">
@@ -55,7 +55,7 @@ export function NewsletterSignup() {
                         Stay in the loop on cutting-edge features like Liquid Intelligence, Second Brain, and Farcastle.
                     </p>
                     <p className="text-muted-foreground font-medium drop-shadow-sm">
-                        Subscribe now for exclusive updates on ILO Market innovations, presale launches, Talk-to-DAO interfaces, DAO Battles, more dao configurations, and community events. 
+                        Subscribe now for exclusive updates on ILO Market innovations, presale launches, Talk-to-DAO interfaces, DAO Battles, more dao configurations like ICO and Pirate DAOs, and community events. 
                         Be the first to meet the next wave of Super Agents and shape the future of DAO engagement.
                     </p>
                 </div>

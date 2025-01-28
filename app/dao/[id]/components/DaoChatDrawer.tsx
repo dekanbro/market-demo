@@ -15,7 +15,7 @@ export function DaoChatDrawer({ open, onClose, title, daoId }: DaoChatDrawerProp
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent 
         side="bottom" 
-        className="h-[85%] p-0 sm:h-[85%]"
+        className="h-[85vh] p-0 sm:h-[85vh] w-full max-w-[100vw] sm:max-w-[600px]"
       >
         <div className="px-4 py-2">
           <SheetTitle>Chat with {title}</SheetTitle>

@@ -37,7 +37,7 @@ export default function RootLayout({
           <Providers>
             <div className="relative w-full h-[200px] md:h-[200px]">
               <Image
-                src="/header-try1.jpg"
+                src="/header2.png"
                 alt="Agent Market Banner"
                 fill
                 className="object-cover"

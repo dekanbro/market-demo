@@ -586,7 +586,6 @@ export async function fetchFeaturedAndRecentDaos({
       ids: [...baseData.featured.map(dao => dao.id), ...baseData.recent.map(dao => dao.id)]
     })
 
-    console.log("********", yeeterData)
 
     // Create a map of yeeter data by DAO ID
     const yeeterDataMap = new Map(
@@ -679,7 +678,6 @@ export async function getDaoById(id: string, chainId: string = CHAIN_ID.BASE): P
       { daoId: id }
     );
 
-    console.log("******** yeeterData", yeeterData)
 
     const hydratedDao = hydrateDaoData({
       ...daoWithChain,
