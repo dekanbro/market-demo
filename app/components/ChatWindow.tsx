@@ -121,7 +121,7 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
         </Button>
       </div>
 
-      <ScrollArea ref={scrollRef} className="flex-1 p-4">
+      <ScrollArea ref={scrollRef} className="flex-1 p-4 min-h-0">
         <div className="space-y-4 max-w-full">
           {messages.map((message, index) => (
             <div
@@ -159,7 +159,7 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
 
       <form
         onSubmit={handleSubmit}
-        className="border-t p-4 flex items-center gap-4"
+        className="border-t p-4 flex items-center gap-4 bg-background"
       >
         <Input
           ref={inputRef}
