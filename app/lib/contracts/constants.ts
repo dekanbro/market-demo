@@ -11,8 +11,8 @@ export const DEFAULT_DAO_PARAMS = {
 } as const
 
 // Time
-export const DEFAULT_START_DATE_OFFSET = 3600 // 1 hour
-export const DEFAULT_DURATION = 3600 // 1 hour
+export const DEFAULT_START_DATE_OFFSET = 360 // 1 hour
+export const DEFAULT_DURATION = 360 // 1 hour
 
 // Shaman permissions
 export const MM_SHAMAN_PERMISSIONS = '3' // Admin/Manage permissions
@@ -33,7 +33,7 @@ export const DEFAULT_YEETER_VALUES = {
   multiplier: "100000",
 }
 
-export const DEFAULT_GOAL = "10000000000000000" // .01
+export const DEFAULT_GOAL = "1000000000000000" // .001
 export const START_TIME = Math.floor(Date.now() / 1000) + DEFAULT_START_DATE_OFFSET
 export const END_TIME = START_TIME + DEFAULT_DURATION
 

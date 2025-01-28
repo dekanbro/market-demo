@@ -82,10 +82,13 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
   const { messages, sendMessage, isLoading, clearHistory } = useChat(itemId, initialMessage);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Scroll to bottom when messages change
+  // Updated scroll logic
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
     }
   }, [messages]);
 
@@ -119,7 +122,7 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
       </div>
 
       <ScrollArea ref={scrollRef} className="flex-1 p-4">
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-full">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -128,11 +131,12 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
               }`}
             >
               <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                className={cn(
+                  "rounded-lg px-4 py-2 max-w-[85%] break-words",
                   message.user === 'You'
                     ? 'bg-primary text-primary-foreground'
                     : getMessageStyles(message.message)
-                }`}
+                )}
               >
                 {renderMessageContent(message.message)}
                 {message.data && (
@@ -145,7 +149,7 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="rounded-lg px-4 py-2 max-w-[80%] bg-muted">
+              <div className="rounded-lg px-4 py-2 max-w-[85%] bg-muted">
                 <Loader2 className="h-4 w-4 animate-spin" />
               </div>
             </div>

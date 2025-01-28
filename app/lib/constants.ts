@@ -24,12 +24,6 @@ export const GRAPH = {
   // ...rest of your graph constants
 } as const
 
-// API Routes
-export const API_ROUTES = {
-  DAOS: '/api/daos',
-  CHAT: '/api/chat',
-} as const 
-
 // List of featured DAOs
 export const FEATURED_DAOS = [
   {
