@@ -50,6 +50,7 @@ export function DaoImage({ dao }: { dao: HydratedDaoItem }) {
         onClose={() => setIsChatOpen(false)}
         title={dao.name}
         daoId={dao.id}
+        dao={dao}
       />
     </>
   )

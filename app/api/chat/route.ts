@@ -6,13 +6,13 @@ import { AGENT_IDS } from '@/app/lib/constants'
 
 export const runtime = 'edge';
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY!,
-// });
 const openai = new OpenAI({
-  apiKey: process.env.VENICE_API_KEY!,
-  baseURL: "https://api.venice.ai/api/v1",
+  apiKey: process.env.OPENAI_API_KEY!,
 });
+// const openai = new OpenAI({
+//   apiKey: process.env.VENICE_API_KEY!,
+//   baseURL: "https://api.venice.ai/api/v1",
+// });
 
 export async function POST(req: Request) {
   const { messages, itemId, walletAddress } = await req.json();

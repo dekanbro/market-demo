@@ -29,6 +29,7 @@ interface ChatWindowProps {
   agentName: string;
   itemId: string;
   initialMessage?: string;
+  backgroundImage?: string;
 }
 
 function renderMessageContent(message: string) {
@@ -75,7 +76,7 @@ function renderMessageContent(message: string) {
   )
 }
 
-export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProps) {
+export function ChatWindow({ agentName, itemId, initialMessage, backgroundImage }: ChatWindowProps) {
   const { user } = usePrivy();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState('');
@@ -121,41 +122,49 @@ export function ChatWindow({ agentName, itemId, initialMessage }: ChatWindowProp
         </Button>
       </div>
 
-      <ScrollArea ref={scrollRef} className="flex-1 p-4 min-h-0">
-        <div className="space-y-4 max-w-full">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                message.user === 'You' ? 'justify-end' : 'justify-start'
-              }`}
-            >
+      <div className="flex-1 min-h-0 relative">
+        {backgroundImage && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-5"
+            style={{ backgroundImage: `url(${backgroundImage})` }}
+          />
+        )}
+        <ScrollArea ref={scrollRef} className="h-full p-4 relative">
+          <div className="space-y-4 max-w-full">
+            {messages.map((message, index) => (
               <div
-                className={cn(
-                  "rounded-lg px-4 py-2 max-w-[85%] break-words",
-                  message.user === 'You'
-                    ? 'bg-primary text-primary-foreground'
-                    : getMessageStyles(message.message)
-                )}
+                key={index}
+                className={`flex ${
+                  message.user === 'You' ? 'justify-end' : 'justify-start'
+                }`}
               >
-                {renderMessageContent(message.message)}
-                {message.data && (
-                  <p className="text-xs mt-1 opacity-70 break-all">
-                    {JSON.stringify(message.data)}
-                  </p>
-                )}
+                <div
+                  className={cn(
+                    "rounded-lg px-4 py-2 max-w-[85%] break-words",
+                    message.user === 'You'
+                      ? 'bg-primary text-primary-foreground'
+                      : getMessageStyles(message.message)
+                  )}
+                >
+                  {renderMessageContent(message.message)}
+                  {message.data && (
+                    <p className="text-xs mt-1 opacity-70 break-all">
+                      {JSON.stringify(message.data)}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="rounded-lg px-4 py-2 max-w-[85%] bg-muted">
-                <Loader2 className="h-4 w-4 animate-spin" />
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="rounded-lg px-4 py-2 max-w-[85%] bg-muted">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
 
       <form
         onSubmit={handleSubmit}

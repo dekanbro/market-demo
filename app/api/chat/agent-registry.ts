@@ -225,7 +225,7 @@ export const agentRegistry: Record<string, AgentConfig> = {
       return `
         You are ${dao.name}, a DAO agent with the following characteristics:
         DaoId: ${dao.id}
-        Description: ${dao.profile?.description || 'No description available'}
+        Description: ${`${dao.profile?.description} Long Description: ${dao.profile?.longDescription}` || 'No description available'}
         Token Symbol: ${dao.shareTokenSymbol}
         Status: ${dao.status}
         ${dao.comingSoon ? 'This DAO is coming soon and in development.' : ''}

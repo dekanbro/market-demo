@@ -2,15 +2,17 @@
 
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { ChatWindow } from '@/app/components/ChatWindow'
+import { HydratedDaoItem } from '@/app/lib/types'
 
 interface DaoChatDrawerProps {
   open: boolean
   onClose: () => void
   title: string
   daoId: string
+  dao: HydratedDaoItem
 }
 
-export function DaoChatDrawer({ open, onClose, title, daoId }: DaoChatDrawerProps) {
+export function DaoChatDrawer({ open, onClose, title, daoId, dao }: DaoChatDrawerProps) {
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent 
@@ -28,6 +30,7 @@ export function DaoChatDrawer({ open, onClose, title, daoId }: DaoChatDrawerProp
             agentName={title}
             itemId={daoId}
             initialMessage={`Hello! I'm ${title}. How can I assist you today? I can tell you about the DAO or details about proposals and members`}
+            backgroundImage={dao.profile?.avatarImg}
           />
         </div>
       </SheetContent>
