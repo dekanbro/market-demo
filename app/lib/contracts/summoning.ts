@@ -531,7 +531,7 @@ export async function calculateMemeShamanAddress(
   return expectedShamanAddress;
 }
 
-export const generateShamanSaltNonce = ({
+export function generateShamanSaltNonce ({
   baalAddress,
   index,
   initializeParams,
@@ -541,38 +541,41 @@ export const generateShamanSaltNonce = ({
 }: {
   baalAddress: Address;
   index: bigint;
-  shamanPermissions: bigint;
-  shamanTemplate: Address;
   initializeParams: `0x${string}`;
   saltNonce: bigint;
-}) => {
-  return keccak256(
-    encodePacked(
-      ["address", "uint256", "address", "uint256", "bytes32", "uint256"],
-      [
-        baalAddress,
-        index,
-        shamanTemplate,
-        shamanPermissions,
-        keccak256(initializeParams),
-        saltNonce,
-      ]
-    )
+  shamanPermissions: bigint;
+  shamanTemplate: Address;
+}) {
+  const encodedValues = encodeAbiParameters(
+    [
+      { type: 'address' },
+      { type: 'uint256' },
+      { type: 'address' },
+      { type: 'uint256' },
+      { type: 'bytes32' },
+      { type: 'uint256' },
+    ],
+    [
+      baalAddress,
+      index,
+      shamanTemplate,
+      shamanPermissions,
+      keccak256(initializeParams),
+      saltNonce,
+    ]
   );
-};
+
+  // Additional keccak256 to match Python implementation
+  return keccak256(encodedValues);
+}
 
 /**
  * Assembles parameters for meme shaman initialization
- * @param yeeterConfig - Yeeter configuration parameters
  * @returns Encoded shaman parameters
  * @throws {Error} If parameters are invalid
  */
-export function assembleMarketMakerShamanParams(
-  daoAddress: Address,
-  yeeterConfig: Partial<YeeterConfig> = {}
-) {
-  const meme_yeeter_shaman_singleton =
-    CONTRACT_ADDRESSES[base.id].YEET24_SINGLETON;
+export function assembleMarketMakerShamanParams() {
+
   const non_fungible_position_manager =
     ADDITIONAL_ADDRESSES[base.id].UNISWAP_V3_POSITION_MANAGER;
   const weth9 = ADDITIONAL_ADDRESSES[base.id].WETH;
@@ -613,6 +616,7 @@ export function assembleYeeterShamanParams(
   shamanAddress: Address,
   yeeterConfig: Partial<YeeterConfig> = {}
 ) {
+  console.log("!!!!!!!!!!!!!!!!!!!")
   const yeeterShamanSingleton = CONTRACT_ADDRESSES[base.id].L2_RESOLVER;
 
   if (!isEthAddress(yeeterShamanSingleton).isValid) {
@@ -646,7 +650,7 @@ export function assembleYeeterShamanParams(
       priceInWei,
       BigInt(multiplier),
       BigInt(minThresholdGoal),
-      [...(feeRecipients as Address[]), shamanAddress as Address], // Add DAO address to recipients
+      [...(feeRecipients as Address[]), shamanAddress as Address], 
       [...feeAmounts, feeAmount] as bigint[], // Add default fee
     ]
   );
@@ -658,65 +662,6 @@ export function assembleYeeterShamanParams(
     shamanInitParams: yeeterShamanParams,
   };
 }
-
-// export function assembleShamanParams(
-//   daoAddress: Address,
-//   yeeterConfig: Partial<YeeterConfig> = {}
-// ): {
-//   mmShamanSingleton: Address;
-//   mmShamanPermission: string;
-//   mmShamanParams: string;
-//   yShamanSingleton: Address;
-//   yShamanPermission: string;
-//   yShamanParams: string;
-//   encoded: `0x${string}`;
-// } {
-//   // const marketMakerShamanParams = assembleMarketMakerShamanParams(
-//   //   daoAddress,
-//   //   yeeterConfig
-//   // );
-//   // // mm_shaman_singleton = mm_shaman_data["shamanSingleton"]
-//   // //   mm_shaman_permission = mm_shaman_data["shamanPermission"]
-//   // //   mm_shaman_params = mm_shaman_data["shamanInitParams"]
-//   // const mmShamanSingleton = marketMakerShamanParams.shamanSingleton;
-//   // const mmShamanPermission = marketMakerShamanParams.shamanPermission;
-//   // const mmShamanParams = marketMakerShamanParams.shamanInitParams;
-
-//   // const yeeterShamanParams = assembleYeeterShamanParams(
-//   //   daoAddress,
-//   //   yeeterConfig
-//   // );
-//   // const yShamanSingleton = yeeterShamanParams.shamanSingleton;
-//   // const yShamanPermission = yeeterShamanParams.shamanPermission;
-//   // const yShamanParams = yeeterShamanParams.shamanInitParams;
-
-//   // shaman_singletons = [mm_shaman_singleton, yeeter_shaman_singleton]
-//   //   shaman_permissions = [mm_shaman_permission, YEET_SHAMAN_PERMISSIONS]
-//   //   shaman_init_params = [mm_shaman_params, yeeter_shaman_params]
-
-//   //   return encode_abi(
-//   //       ["address[]", "uint256[]", "bytes[]"],
-//   //       [shaman_singletons, shaman_permissions, shaman_init_params]
-//   //   )
-//   const shamanSingletons = [mmShamanSingleton, yShamanSingleton] as const;
-//   const shamanPermissions = [mmShamanPermission, yShamanPermission].map((p) =>
-//     BigInt(p)
-//   );
-//   const shamanInitParams = [mmShamanParams, yShamanParams] as const;
-
-//   return {
-//     mmShamanSingleton,
-//     mmShamanPermission,
-//     mmShamanParams,
-//     yShamanSingleton,
-//     yShamanPermission,
-//     yShamanParams,
-//     encoded: encodeAbiParameters(
-//       parseAbiParameters("address[],uint256[],bytes[]"),
-//       [shamanSingletons, shamanPermissions, shamanInitParams]
-//     ) as `0x${string}`,
-//   };
-// }
 
 /**
  * Assembles all arguments needed for meme yeeter summoning
@@ -752,16 +697,12 @@ export async function assembleMemeYeeterSummonerArgs(
     const sharesTokenParams = assembleSharesTokenParams(yeeterConfig);
 
     //
-    const marketMakerShamanParams = assembleMarketMakerShamanParams(
-      daoAddress,
-      yeeterConfig
-    );
-    // mm_shaman_singleton = mm_shaman_data["shamanSingleton"]
-    //   mm_shaman_permission = mm_shaman_data["shamanPermission"]
-    //   mm_shaman_params = mm_shaman_data["shamanInitParams"]
+    const marketMakerShamanParams = assembleMarketMakerShamanParams();
+
     const mmShamanSingleton = marketMakerShamanParams.shamanSingleton;
     const mmShamanPermission = marketMakerShamanParams.shamanPermission;
     const mmShamanParams = marketMakerShamanParams.shamanInitParams;
+    console.log("mmShamanParams", keccak256(mmShamanParams));
 
     const index = BigInt(0);
     const shamanSaltNonce = generateShamanSaltNonce({
@@ -784,6 +725,7 @@ export async function assembleMemeYeeterSummonerArgs(
     const yShamanPermission = yeeterShamanParams.shamanPermission;
     const yShamanParams = yeeterShamanParams.shamanInitParams;
 
+    // throw new Error("stop here");
     const shamanSingletons = [mmShamanSingleton, yShamanSingleton] as const;
     const shamanPermissions = [mmShamanPermission, yShamanPermission].map((p) =>
       BigInt(p)

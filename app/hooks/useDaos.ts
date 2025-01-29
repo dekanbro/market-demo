@@ -29,8 +29,15 @@ export function useDaos({ chainId, filter }: UseDaosOptions = {}): UseDaosResult
         if (chainId) params.append('chainId', chainId)
         if (filter) params.append('filter', filter)
         params.append('ids', FEATURED_DAOS.map(dao => dao.id).join(','))
+        params.append('_t', Date.now().toString())
         
-        const res = await fetch(`/api/daos?${params}`)
+        const res = await fetch(`/api/daos?${params}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        })
         
         if (!res.ok) {
           const errorData = await res.json()

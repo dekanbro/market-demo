@@ -25,13 +25,18 @@ interface BuyDialogProps {
 }
 
 export function BuyDialog({ dao }: BuyDialogProps) {
-  const { login, authenticated, sendTransaction } = usePrivy()
+  const { login, authenticated } = usePrivy()
   const { wallets } = useWallets()
+  const { wallet } = useActiveWallet()
   const [amount, setAmount] = useState('')
   const [message, setMessage] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { refetch: refetchBalance } = useEthBalance(dao.yeeterData?.vault)
+
+  if (!wallet) {
+    return <Button onClick={() => login()}>Connect Wallet</Button>
+  }
 
   const presetAmounts = useMemo(() => {
     if (!dao.yeeterData?.minTribute) return []
@@ -81,6 +86,9 @@ export function BuyDialog({ dao }: BuyDialogProps) {
         functionName: 'contributeEth',
         args: [message || '']
       })
+
+      console.log('wallets', wallets)
+      console.log('wallet', wallet)
       
       const provider = await wallets[0].getEthereumProvider()
       const tx = await provider.request({

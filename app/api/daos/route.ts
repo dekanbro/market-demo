@@ -3,6 +3,7 @@ import { fetchFeaturedAndRecentDaos } from '@/app/lib/dao-service'
 import { FEATURED_DAOS, DEFAULT_DAO_DATE } from '@/app/lib/constants'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export async function GET(request: Request) {
   try {
@@ -24,6 +25,8 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, must-revalidate',
+        'Pragma': 'no-cache'
       }
     })
   } catch (error) {
@@ -36,6 +39,8 @@ export async function GET(request: Request) {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, must-revalidate',
+        'Pragma': 'no-cache'
       }
     })
   }
