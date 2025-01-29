@@ -28,12 +28,15 @@ export const GRAPH = {
 export const FEATURED_DAOS = [
   {
     id: '0x4d5a5b4a679b10038e1677c84cb675d10d29fffd', // RGCVII
+    agentImage: undefined,
   },
   {
     id: '0x0d8d4d5de4ea1ed04bfd94375a8f34078194ff61', // IRON
+    agentImage: undefined,
   },
   {
     id: '0xc08ee7e26620da30e04ee85f23e00be189d4e2ec', // FLY
+    agentImage: undefined,
   },
 ] as const
 
@@ -60,7 +63,8 @@ export const SPECIAL_DAOS = {
     {
       id: '0xf02fd4286917270cb94fbc13a0f4e1ed76f7e986',
       chainId: '0x64',
-      name: 'Special DAO Name' // Optional: add other metadata as needed
+      name: 'Special DAO Name',
+      agentImage: 'https://hackmd.io/_uploads/HyB_WGudJl.png', // Optional: add other metadata as needed
     }
   ]
 } as const

@@ -255,6 +255,9 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
   const isFeatured = FEATURED_DAOS.some(featured => featured.id === dao.id)
   const isSuperAgent = SUPER_AGENTS.some(agent => agent.id === dao.id)
   const isSpecialDao = SPECIAL_DAOS.GNOSIS.some(special => special.id === dao.id)
+
+  const specialDao = SPECIAL_DAOS.GNOSIS.find(special => special.id === dao.id)
+  const featuredDao = FEATURED_DAOS.find(featured => featured.id === dao.id)
   
   let profile = undefined
   if (dao.rawProfile?.[0]?.content) {
@@ -294,7 +297,8 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     type,
     price: 0,
     isPresale,
-    isSpecialDao
+    isSpecialDao,
+    agentImage: specialDao?.agentImage || featuredDao?.agentImage || undefined
   }
 }
 

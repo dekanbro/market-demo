@@ -30,7 +30,7 @@ export function DaoChatDrawer({ open, onClose, title, daoId, dao }: DaoChatDrawe
             agentName={title}
             itemId={daoId}
             initialMessage={`Hello! I'm ${title}. How can I assist you today? I can tell you about the DAO or details about proposals and members`}
-            backgroundImage={dao.profile?.avatarImg}
+            backgroundImage={dao.agentImage || dao.profile?.avatarImg}
           />
         </div>
       </SheetContent>

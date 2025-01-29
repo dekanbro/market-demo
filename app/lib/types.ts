@@ -99,6 +99,7 @@ export interface HydratedDaoItem extends DaoItem {
   yeeterData?: YeeterData | null;
   isPresale?: boolean;
   isSpecialDao: boolean;
+  agentImage?: string;
 }
 
 export interface YeeterData {
