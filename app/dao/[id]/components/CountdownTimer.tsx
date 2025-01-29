@@ -26,16 +26,24 @@ export function CountdownTimer({ startTime, endTime }: CountdownTimerProps) {
     const endTimeMs = parseInt(endTime) * 1000
     const now = Date.now()
 
-    // Determine if we're counting down to start or end
+    // Determine if we're in presale period
+    const isInPresalePeriod = now >= startTimeMs && now < endTimeMs
+    setIsPresale(isInPresalePeriod)
+
+    // Set target time based on current period
     const targetTime = now < startTimeMs ? startTimeMs : 
                       now < endTimeMs ? endTimeMs : 0
-
-    setIsPresale(now >= startTimeMs && now < endTimeMs)
 
     if (!targetTime) return
 
     const interval = setInterval(() => {
-      const timeLeft = targetTime - Date.now()
+      const now = Date.now()
+      const timeLeft = targetTime - now
+      
+      // Update presale state
+      const isInPresale = now >= startTimeMs && now < endTimeMs
+      setIsPresale(isInPresale)
+      
       setTimeLeft(timeLeft > 0 ? timeLeft : 0)
     }, 1000)
 
@@ -45,7 +53,19 @@ export function CountdownTimer({ startTime, endTime }: CountdownTimerProps) {
   const { days, hours, minutes, seconds } = formatTimeLeft(timeLeft)
 
   if (timeLeft <= 0) {
-    return <Card className="p-4 text-center">Presale Ended</Card>
+    const now = Date.now()
+    const endTimeMs = parseInt(endTime) * 1000
+    if (now >= endTimeMs) {
+      return <Card className="p-4 text-center">Presale Ended</Card>
+    }
+    return (
+      <Card className="p-4">
+        <p className="text-sm text-muted-foreground mb-2">Presale Active!</p>
+        <div className="text-center">
+          <p className="text-2xl font-bold text-green-500">🎉 Join Now 🎉</p>
+        </div>
+      </Card>
+    )
   }
 
   return (

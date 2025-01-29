@@ -24,17 +24,15 @@ export function RatifyDialog() {
         <DialogHeader>
           <DialogTitle>Ratify DAO Documents</DialogTitle>
           <DialogDescription className="space-y-3 pt-3">
-            <p>
-              Ratifying documents allows you to make information canonical for the DAO's AI agent. 
-              This process requires creating a proposal that members can vote on.
-            </p>
-            <p>
-              Once ratified, these documents become part of the DAO's permanent knowledge base, 
-              enhancing the AI agent's ability to provide accurate information and make informed decisions.
-            </p>
-            <p className="font-semibold text-primary">
+            Ratifying documents allows you to make information canonical for the DAO's AI agent. 
+            This process requires creating a proposal that members can vote on.
+            <span className="inline-block pt-2">
+            Once ratified, these documents become part of the DAO's permanent knowledge base, 
+            enhancing the AI agent's ability to provide accurate information and make informed decisions.
+            </span>
+            <span className="inline-block font-semibold text-primary pt-2">
               This feature is coming soon! 🚀
-            </p>
+            </span>
           </DialogDescription>
         </DialogHeader>
       </DialogContent>

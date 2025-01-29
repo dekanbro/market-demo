@@ -69,16 +69,6 @@ export function DaoTabs({ dao }: { dao: HydratedDaoItem }) {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Members</p>
-              <p className="text-2xl font-bold">{dao.activeMemberCount}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Proposals</p>
-              <p className="text-2xl font-bold">{dao.proposalCount}</p>
-            </div>
-          </div>
         </Card>
       </TabsContent>
       <TabsContent value="addons">

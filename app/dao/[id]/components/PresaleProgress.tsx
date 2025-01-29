@@ -4,6 +4,7 @@ import { useEthBalance } from '@/app/hooks/useEthBalance'
 import { Progress } from '@/components/ui/progress'
 import { formatEther } from 'viem'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 interface PresaleProgressProps {
   vaultAddress: string
@@ -37,7 +38,14 @@ export function PresaleProgress({ vaultAddress, goal }: PresaleProgressProps) {
   
   return (
     <div className="space-y-2">
-      <Progress value={percentage} className="w-full" />
+      <Progress 
+        value={percentage} 
+        className={cn(
+          "w-full h-2",
+          "bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20",
+          "[&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:via-purple-500 [&>div]:to-pink-500"
+        )}
+      />
       <div className="flex justify-between text-sm text-muted-foreground">
         <span>{currentAmount.toFixed(4)} ETH</span>
         <span>{percentage.toFixed(1)}%</span>

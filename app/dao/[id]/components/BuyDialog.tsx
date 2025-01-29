@@ -1,24 +1,18 @@
 'use client'
 
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { useState, useMemo } from "react"
-import { HydratedDaoItem } from "@/app/lib/types"
-import { formatEther, parseEther, encodeFunctionData } from "viem"
-import { usePrivy, useActiveWallet, useWallets } from '@privy-io/react-auth'
-import { toast } from "sonner"
-import { yeeterAbi } from "@/app/lib/contracts/abis"
-import { base } from "viem/chains" // replace with your chain
+import { useState, useMemo } from 'react'
+import { usePrivy } from '@privy-io/react-auth'
+import { useWallets, useActiveWallet } from '@privy-io/react-auth'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { HydratedDaoItem } from '@/app/lib/types'
+import { encodeFunctionData, formatEther, parseEther } from 'viem'
 import { useEthBalance } from '@/app/hooks/useEthBalance'
+import { Loader2 } from 'lucide-react'
+import { yeeterAbi } from '@/app/lib/contracts/abis'
+import { toast } from 'sonner'
+import { Textarea } from '@/components/ui/textarea'
 
 interface BuyDialogProps {
   dao: HydratedDaoItem
@@ -27,16 +21,11 @@ interface BuyDialogProps {
 export function BuyDialog({ dao }: BuyDialogProps) {
   const { login, authenticated } = usePrivy()
   const { wallets } = useWallets()
-  const { wallet } = useActiveWallet()
   const [amount, setAmount] = useState('')
   const [message, setMessage] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { refetch: refetchBalance } = useEthBalance(dao.yeeterData?.vault)
-
-  if (!wallet) {
-    return <Button onClick={() => login()}>Connect Wallet</Button>
-  }
 
   const presetAmounts = useMemo(() => {
     if (!dao.yeeterData?.minTribute) return []
@@ -46,8 +35,8 @@ export function BuyDialog({ dao }: BuyDialogProps) {
     
     return [
       { label: `${baseAmount} ETH`, value: baseAmount.toString() },
-      { label: `${baseAmount * 100} ETH`, value: (baseAmount * 100).toString() },
-      { label: `${baseAmount * 1000} ETH`, value: (baseAmount * 1000).toString() },
+      { label: `${baseAmount * 10} ETH`, value: (baseAmount * 10).toString() },
+      { label: `${baseAmount * 100} ETH`, value: (baseAmount * 100).toString() }
     ]
   }, [dao.yeeterData?.minTribute])
 
@@ -63,6 +52,28 @@ export function BuyDialog({ dao }: BuyDialogProps) {
       return null
     }
   }, [amount, dao.yeeterData?.multiplier])
+
+  const waitForTransaction = async (txHash: string) => {
+    const maxAttempts = 20; // 20 * 3s = 60 seconds max wait
+    let attempts = 0;
+    
+    while (attempts < maxAttempts) {
+      console.log("waiting for transaction", attempts)
+      const provider = await wallets[0].getEthereumProvider();
+      const receipt = await provider.request({
+        method: 'eth_getTransactionReceipt',
+        params: [txHash]
+      });
+      
+      if (receipt) {
+        return receipt;
+      }
+      
+      await new Promise(r => setTimeout(r, 3000)); // Wait 3 seconds
+      attempts++;
+    }
+    throw new Error('Transaction not mined');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,11 +98,8 @@ export function BuyDialog({ dao }: BuyDialogProps) {
         args: [message || '']
       })
 
-      console.log('wallets', wallets)
-      console.log('wallet', wallet)
-      
       const provider = await wallets[0].getEthereumProvider()
-      const tx = await provider.request({
+      const txHash = await provider.request({
         method: 'eth_sendTransaction',
         params: [{
           to: toAddress,
@@ -100,15 +108,15 @@ export function BuyDialog({ dao }: BuyDialogProps) {
           data
         }]
       })
-      console.log('Transaction hash:', tx)
+      console.log('Transaction hash:', txHash)
 
       toast.success('Transaction submitted')
       setIsOpen(false)
       
-      // Wait a bit for the transaction to be mined and then refetch the balance
-      setTimeout(() => {
-        refetchBalance()
-      }, 5000)
+      // Wait for transaction receipt
+      await waitForTransaction(txHash as string)
+      refetchBalance()
+      toast.success('Transaction confirmed')
 
     } catch (error) {
       console.error('Transaction failed:', error)
@@ -118,22 +126,26 @@ export function BuyDialog({ dao }: BuyDialogProps) {
     }
   }
 
+  if (!wallets?.[0]) {
+    return (
+      <Button 
+        size="lg" 
+        className="w-full" 
+        onClick={() => login()}
+      >
+        Connect Wallet
+      </Button>
+    )
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button 
           size="lg" 
-          className="flex-1"
-          disabled={!dao.isPresale}
-          title={!dao.isPresale ? "Not available for purchase yet" : undefined}
+          className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
         >
-          {dao.isPresale ? (
-            "Buy Tokens"
-          ) : dao.comingSoon ? (
-            "Coming Soon"
-          ) : (
-            "Sale Ended"
-          )}
+          Buy Tokens
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -164,7 +176,7 @@ export function BuyDialog({ dao }: BuyDialogProps) {
             </label>
             <Input
               type="number"
-              step={dao.yeeterData ? formatEther(BigInt(dao.yeeterData.minTribute)) : '0.001'}
+              step={'0.0001'}
               min={dao.yeeterData ? formatEther(BigInt(dao.yeeterData.minTribute)) : '0'}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
