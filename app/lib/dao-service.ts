@@ -287,8 +287,13 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     
     comingSoon = startTime > now && startTime <= twoDaysFromNow
     isPresale = now >= startTime && now < endTime
+
   }
 
+  const marketMakerShaman = dao.shamen.find(shaman => {
+    // console.log("[DAO] Shaman ID:", shaman.shamanAddress, "Yeeter ID:", dao.yeeterData?.id)
+    return shaman.shamanAddress.toLowerCase() !== dao.yeeterData?.id.toLowerCase()
+  })
   return {
     ...dao,
     profile,
@@ -298,7 +303,8 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     price: 0,
     isPresale,
     isSpecialDao,
-    agentImage: specialDao?.agentImage || featuredDao?.agentImage || undefined
+    agentImage: specialDao?.agentImage || featuredDao?.agentImage || undefined,
+    marketMakerShamanAddress: marketMakerShaman?.shamanAddress || undefined
   }
 }
 
