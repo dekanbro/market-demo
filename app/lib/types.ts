@@ -100,6 +100,7 @@ export interface HydratedDaoItem extends DaoItem {
   isPresale?: boolean;
   isSpecialDao: boolean;
   agentImage?: string;
+  agentName?: string;
   marketMakerShamanAddress?: string;
 }
 

@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react'
 import { HydratedDaoItem } from '@/app/lib/types'
 import { DaoHeader } from './DaoHeader'
-
 import { DaoInfo } from './DaoInfo'
 import { DaoTabs } from './DaoTabs'
 import { DaoActions } from './DaoActions'
 import { DaoImage } from './DaoImage'
 import { CountdownTimer } from './CountdownTimer'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 export function DaoDetails({ id }: { id: string }) {
   const [dao, setDao] = useState<HydratedDaoItem | null>(null)
@@ -37,10 +38,15 @@ export function DaoDetails({ id }: { id: string }) {
   if (!dao) return <div>DAO not found</div>
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <div className="grid md:grid-cols-2 gap-8">
+    <div className="container mx-auto py-4">
+      <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        Back to DAOs
+      </Link>
+
+      <div className="grid md:grid-cols-2 gap-8 mb-8">
         <DaoImage dao={dao} />
-        <div className="space-y-6">
+        <div className="space-y-8">
           <DaoHeader dao={dao} />
           {dao.yeeterData && (
             <CountdownTimer 
@@ -53,7 +59,7 @@ export function DaoDetails({ id }: { id: string }) {
         </div>
       </div>
       
-      <div className="border-t pt-8">
+      <div className="border-t pt-8 mt-12">
         <DaoTabs dao={dao} />
       </div>
     </div>

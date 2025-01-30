@@ -16,9 +16,10 @@ import { Textarea } from '@/components/ui/textarea'
 
 interface BuyDialogProps {
   dao: HydratedDaoItem
+  disabled?: boolean
 }
 
-export function BuyDialog({ dao }: BuyDialogProps) {
+export function BuyDialog({ dao, disabled }: BuyDialogProps) {
   const { login, authenticated } = usePrivy()
   const { wallets } = useWallets()
   const [amount, setAmount] = useState('')
@@ -143,9 +144,16 @@ export function BuyDialog({ dao }: BuyDialogProps) {
       <DialogTrigger asChild>
         <Button 
           size="lg" 
-          className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
+          className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
+          disabled={disabled}
         >
-          Buy Tokens
+          {disabled && dao.comingSoon ? (
+            'Coming Soon'
+          ) : disabled ? (
+            'Presale Ended'
+          ) : (
+            'Buy Tokens'
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

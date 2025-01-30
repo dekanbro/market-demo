@@ -32,7 +32,6 @@ export function MarketMakerStatus({ daoId, shamanAddress, chainId }: MarketMaker
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Market Maker Status</h3>
       <Card className="p-4 space-y-3">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -76,16 +75,6 @@ export function MarketMakerStatus({ daoId, shamanAddress, chainId }: MarketMaker
             />
           )}
           
-          {data.uniswapUrl && data.pool !== zeroAddress && (
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => window.open(data.uniswapUrl, '_blank')}
-            >
-              View Pool on Uniswap
-              <ExternalLinkIcon className="ml-2 h-4 w-4" />
-            </Button>
-          )}
         </div>
       </Card>
     </div>

@@ -47,7 +47,7 @@ export function DaoInfo({ dao }: { dao: HydratedDaoItem }) {
         <div>
           <p className="text-sm text-muted-foreground">Treasury</p>
           <p className="text-xl font-medium">
-            {isLoading ? '...' : `${Number(balance).toFixed(4)} ETH`}
+            {isLoading ? '...' : `${Number(balance).toFixed(4)}`}{dao.chainId === CHAIN_ID.GNOSIS ? ' XDAI' : ' ETH'}
           </p>
           <a 
             href={`https://admin.daohaus.club/#/molochv3/${dao.chainId}/${dao.id}/safes`} 

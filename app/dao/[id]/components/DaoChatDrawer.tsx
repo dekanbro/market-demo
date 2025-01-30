@@ -13,6 +13,9 @@ interface DaoChatDrawerProps {
 }
 
 export function DaoChatDrawer({ open, onClose, title, daoId, dao }: DaoChatDrawerProps) {
+  // Use agentName if available, otherwise fall back to title
+  const displayName = dao.agentName || title
+
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent 
@@ -20,16 +23,16 @@ export function DaoChatDrawer({ open, onClose, title, daoId, dao }: DaoChatDrawe
         className="flex flex-col h-[85%] p-0"
       >
         <div className="px-4 py-2 border-b">
-          <SheetTitle>Chat with {title}</SheetTitle>
+          <SheetTitle>Chat with {displayName}</SheetTitle>
           <SheetDescription>
-            Have a conversation with the {title} DAO. Ask about proposals, members, or general information.
+            Have a conversation with the {displayName} DAO. Ask about proposals, members, or general information.
           </SheetDescription>
         </div>
         <div className="flex-1 min-h-0">
           <ChatWindow 
-            agentName={title}
+            agentName={displayName}
             itemId={daoId}
-            initialMessage={`Hello! I'm ${title}. How can I assist you today? I can tell you about the DAO or details about proposals and members`}
+            initialMessage={`Hello! I'm ${displayName}. How can I assist you today? I can tell you about the DAO or details about proposals and members`}
             backgroundImage={dao.agentImage || dao.profile?.avatarImg}
           />
         </div>
