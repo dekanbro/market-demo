@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { HydratedDaoItem } from '@/app/lib/types'
 import { DaoHeader } from './DaoHeader'
 import { DaoInfo } from './DaoInfo'
@@ -21,22 +21,22 @@ export function DaoDetails({ id, initialDao }: DaoDetailsProps) {
   const [dao, setDao] = useState<HydratedDaoItem>(initialDao)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    async function refreshDao() {
-      try {
-        const res = await fetch(`/api/dao/${id}`)
-        if (!res.ok) throw new Error('Failed to fetch DAO')
-        const data = await res.json()
-        setDao(data)
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to fetch DAO')
-      }
+  const refreshDao = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/dao/${id}`)
+      if (!res.ok) throw new Error('Failed to fetch DAO')
+      const data = await res.json()
+      setDao(data)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to fetch DAO')
     }
+  }, [id])
 
+  useEffect(() => {
     // Optionally refresh data periodically
     const interval = setInterval(refreshDao, 30000)
     return () => clearInterval(interval)
-  }, [id])
+  }, [refreshDao])
 
   if (error) {
     return <div>Error: {error}</div>
@@ -69,7 +69,10 @@ export function DaoDetails({ id, initialDao }: DaoDetailsProps) {
           )}
 
           <ErrorBoundary fallback={<div>Error loading DAO info</div>}>
-            <DaoInfo dao={dao} />
+            <DaoInfo 
+              dao={dao} 
+              onRefresh={refreshDao}
+            />
           </ErrorBoundary>
 
           <ErrorBoundary fallback={<div>Error loading DAO actions</div>}>

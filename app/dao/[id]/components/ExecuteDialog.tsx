@@ -9,13 +9,16 @@ import { encodeFunctionData } from 'viem'
 import { Loader2, Rocket } from 'lucide-react'
 import { toast } from 'sonner'
 import { MarketMakerAbi } from '@/app/lib/contracts/abis/market-maker'
+import { getDaoById } from '@/app/lib/dao-service'
 
 interface ExecuteDialogProps {
   shamanAddress: string
   chainId?: string
+  daoId: string
+  onSuccess?: () => void
 }
 
-export function ExecuteDialog({ shamanAddress, chainId }: ExecuteDialogProps) {
+export function ExecuteDialog({ shamanAddress, chainId, daoId, onSuccess }: ExecuteDialogProps) {
   const { login, authenticated } = usePrivy()
   const { wallets } = useWallets()
   const [isOpen, setIsOpen] = useState(false)
@@ -55,6 +58,9 @@ export function ExecuteDialog({ shamanAddress, chainId }: ExecuteDialogProps) {
         
         if (receipt) {
           setIsOpen(false)
+          if (onSuccess) {
+            onSuccess()
+          }
           toast.success('Market maker executed successfully')
           break
         }
@@ -99,7 +105,6 @@ export function ExecuteDialog({ shamanAddress, chainId }: ExecuteDialogProps) {
           <DialogTitle>Execute Market Maker</DialogTitle>
           <DialogDescription>
             This will execute the market maker contract, creating a Uniswap pool with the collected ETH and tokens.
-            This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 

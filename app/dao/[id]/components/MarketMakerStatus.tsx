@@ -12,9 +12,15 @@ interface MarketMakerStatusProps {
   daoId: string
   shamanAddress: string
   chainId?: string
+  onRefresh?: () => void
 }
 
-export function MarketMakerStatus({ daoId, shamanAddress, chainId }: MarketMakerStatusProps) {
+export function MarketMakerStatus({ 
+  daoId, 
+  shamanAddress, 
+  chainId,
+  onRefresh 
+}: MarketMakerStatusProps) {
   const { data, isLoading, error } = useMarketMaker(daoId, shamanAddress, chainId)
 
   if (isLoading) {
@@ -72,6 +78,8 @@ export function MarketMakerStatus({ daoId, shamanAddress, chainId }: MarketMaker
             <ExecuteDialog 
               shamanAddress={shamanAddress}
               chainId={chainId}
+              daoId={daoId}
+              onSuccess={onRefresh}
             />
           )}
           

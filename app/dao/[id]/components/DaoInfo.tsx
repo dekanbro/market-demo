@@ -16,7 +16,12 @@ function formatDate(timestamp: string) {
   })
 }
 
-export function DaoInfo({ dao }: { dao: HydratedDaoItem }) {
+interface DaoInfoProps {
+  dao: HydratedDaoItem
+  onRefresh?: () => void
+}
+
+export function DaoInfo({ dao, onRefresh }: DaoInfoProps) {
   const { balance, isLoading } = useEthBalance(dao.safeAddress, dao.chainId)
   const now = Math.floor(Date.now() / 1000)
   const isPresaleEnded = dao.yeeterData && now > Number(dao.yeeterData.endTime)
@@ -75,6 +80,7 @@ export function DaoInfo({ dao }: { dao: HydratedDaoItem }) {
           daoId={dao.id}
           shamanAddress={dao.marketMakerShamanAddress}
           chainId={dao.chainId}
+          onRefresh={onRefresh}
         />
       )}
 
