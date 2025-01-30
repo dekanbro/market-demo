@@ -4,7 +4,7 @@ import { useMarketMaker } from '@/app/hooks/useMarketMaker'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { formatEther } from 'viem'
+import { formatEther, zeroAddress } from 'viem'
 import { ExternalLinkIcon, Rocket } from 'lucide-react'
 import { ExecuteDialog } from './ExecuteDialog'
 
@@ -38,13 +38,16 @@ export function MarketMakerStatus({ daoId, shamanAddress, chainId }: MarketMaker
           <div>
             <p className="text-sm text-muted-foreground">Status</p>
             <p className="font-medium">
-              {data.executed ? (
+              {data.executed && data.pool !== zeroAddress ? (
                 <span className="text-green-500">Pool Active</span>
               ) : data.canExecute ? (
                 <span className="text-yellow-500">Ready to Execute</span>
+              ) : data.pool === zeroAddress ? (
+                <span className="text-red-500">Pool Not Created</span>
               ) : (
                 <span className="text-muted-foreground">Pending</span>
               )}
+              {}
             </p>
           </div>
           <div>
@@ -58,7 +61,7 @@ export function MarketMakerStatus({ daoId, shamanAddress, chainId }: MarketMaker
             </p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Final Balance</p>
+            <p className="text-sm text-muted-foreground">Execution Balance</p>
             <p className="font-medium">
               {formatEther(BigInt(data.balance))} ETH
             </p>
@@ -73,7 +76,7 @@ export function MarketMakerStatus({ daoId, shamanAddress, chainId }: MarketMaker
             />
           )}
           
-          {data.uniswapUrl && (
+          {data.uniswapUrl && data.pool !== zeroAddress && (
             <Button 
               variant="outline" 
               className="w-full"
