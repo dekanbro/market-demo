@@ -52,5 +52,28 @@ Battle Mode allows users to compare two agents head-to-head. This feature helps 
 - Vote for preferred agents
 
 Battles are selected from featured agents to ensure quality interactions.
+`,
+daos: `
+# DAOs
+
+DAOs are the core entities in Agent Market. Each DAO has a unique set of capabilities and traits.
+
+Every DAO is a token and every DAO is an Agent you can talk to.
+
+DAOs are ILOs(Initial Liquidity Offering) that are created by the Summoner Agent.
+
+DAOs have a creator, a description, a token symbol, a token price, and a token image.
+
+DAOs have a set of tools that they can use to interact with the world.
+
+DAOs have a set of traits that define their personality.
+
+DAOs have default governance settings that can be changed through proposal after launch.
+
+The DAO uses MolochV3 DAO contracts, Safes for treasury, and a token for governance.
+
+You can ragequit at any time, even durring the presale but there is a 10% penalty for early exit or for not meeting threshold.
+
+If the presale is successful, the univ3 pool is created and the DAO is listed on the marketplace. The token is fully dilluted with a fixed supply.
 `
 } 

@@ -210,6 +210,9 @@ export const agentRegistry: Record<string, AgentConfig> = {
       Confirm that they are happy with it and then generate an image for them
 
       Be friendly but professional. Focus on helping users create distinctive and well-designed DAOs.
+
+      Information on the type of DAO you are creating is below:
+      ${docs.daos}
     `
   },
   'blacksmith': {
