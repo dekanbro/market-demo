@@ -4,6 +4,8 @@ import { useEthBalance } from '@/app/hooks/useEthBalance'
 import { HydratedDaoItem } from '@/app/lib/types'
 import { PresaleProgress } from './PresaleProgress'
 import { CHAIN_ID } from '@/app/lib/constants'
+import { MarketMakerStatus } from './MarketMakerStatus'
+
 function formatDate(timestamp: string) {
   return new Date(parseInt(timestamp) * 1000).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -16,6 +18,8 @@ function formatDate(timestamp: string) {
 
 export function DaoInfo({ dao }: { dao: HydratedDaoItem }) {
   const { balance, isLoading } = useEthBalance(dao.safeAddress, dao.chainId)
+  const now = Math.floor(Date.now() / 1000)
+  const isPresaleEnded = dao.yeeterData && now > Number(dao.yeeterData.endTime)
 
   return (
     <div className="space-y-4">
@@ -64,6 +68,14 @@ export function DaoInfo({ dao }: { dao: HydratedDaoItem }) {
             goal={dao.yeeterData?.goal}
           />
         </div>
+      )}
+
+      {isPresaleEnded && dao.marketMakerShamanAddress && (
+        <MarketMakerStatus 
+          daoId={dao.id}
+          shamanAddress={dao.marketMakerShamanAddress}
+          chainId={dao.chainId}
+        />
       )}
 
       {dao.profile?.description && (
