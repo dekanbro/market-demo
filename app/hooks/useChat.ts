@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { chatStorage } from '@/app/lib/db';
@@ -29,29 +31,41 @@ function handleToolResponse(response: ToolResponse): Omit<Message, 'id'> {
 
 export function useChat(itemId: string, initialMessage?: string) {
   const { getAccessToken, user } = usePrivy();
-
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [currentToolCall, setCurrentToolCall] = useState<{
     function?: { name: string; arguments: string };
   } | null>(null);
 
   // Load stored messages on mount
   useEffect(() => {
+    let mounted = true;
+
     async function loadMessages() {
-      const storedMessages = await chatStorage.getMessages(itemId);
-      if (storedMessages.length > 0) {
-        setMessages(storedMessages);
-      } else if (initialMessage) {
-        const message = await chatStorage.addMessage({
-          itemId,
-          user: 'Assistant',
-          message: initialMessage
-        });
-        setMessages([message]);
+      try {
+        const storedMessages = await chatStorage.getMessages(itemId);
+        if (!mounted) return;
+
+        if (storedMessages.length > 0) {
+          setMessages(storedMessages);
+        } else if (initialMessage) {
+          const message = await chatStorage.addMessage({
+            itemId,
+            user: 'Assistant',
+            message: initialMessage
+          });
+          setMessages([message]);
+        }
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      } finally {
+        setIsInitialized(true);
       }
     }
+
     loadMessages();
+    return () => { mounted = false };
   }, [itemId, initialMessage]);
 
   const sendMessage = async (message: string) => {
@@ -183,6 +197,7 @@ export function useChat(itemId: string, initialMessage?: string) {
     messages,
     sendMessage,
     isLoading,
-    clearHistory: resetChat
+    clearHistory: resetChat,
+    isInitialized
   };
 } 

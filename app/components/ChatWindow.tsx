@@ -80,7 +80,7 @@ export function ChatWindow({ agentName, itemId, initialMessage, backgroundImage 
   const { user } = usePrivy();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState('');
-  const { messages, sendMessage, isLoading, clearHistory } = useChat(itemId, initialMessage);
+  const { messages, sendMessage, isLoading, clearHistory, isInitialized } = useChat(itemId, initialMessage);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Updated scroll logic
@@ -106,6 +106,19 @@ export function ChatWindow({ agentName, itemId, initialMessage, backgroundImage 
       return 'bg-muted/50 border border-border';
     }
     return 'bg-muted';
+  }
+
+  // Add loading state for initial load
+  if (!isInitialized) {
+    return (
+      <div className="flex-1 min-h-0 relative p-4">
+        <div className="flex justify-start">
+          <div className="rounded-lg px-4 py-2 max-w-[85%] bg-muted">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
