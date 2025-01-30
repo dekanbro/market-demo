@@ -77,8 +77,8 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
                   "border font-medium backdrop-blur-sm",
                   {
                     "bg-green-600/90 text-white border-green-500/30": dao.status === "featured",
-                    "bg-blue-600/90 text-white border-blue-500/30": dao.status === "active",
-                    "bg-gray-600/90 text-white border-gray-500/30": dao.status === "failed"
+                    // "bg-blue-600/90 text-white border-blue-500/30": dao.status === "active",
+                    // "bg-gray-600/90 text-white border-gray-500/30": dao.status === "failed"
                   }
                 )}
               >

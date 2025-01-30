@@ -2,6 +2,8 @@ export const docs = {
   platform: `
 # Agent Market Platform
 
+This Doc is a placeholder and is in development.
+
 Agent Market is a decentralized marketplace for AI-powered DAOs. Each DAO functions as an autonomous agent with specific capabilities and traits.
 
 ## Key Features

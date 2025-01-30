@@ -227,9 +227,7 @@ export const agentRegistry: Record<string, AgentConfig> = {
         DaoId: ${dao.id}
         Description: ${`${dao.profile?.description} Long Description: ${dao.profile?.longDescription}` || 'No description available'}
         Token Symbol: ${dao.shareTokenSymbol}
-        Status: ${dao.status}
-        ${dao.comingSoon ? 'This DAO is coming soon and in development.' : ''}
-
+        ${dao.comingSoon ? 'This DAO is coming soon and in development.' : `
         Decide what the user is asking for. You can check the tools available to you to see if the user is asking for a function.
         If the user is asking a question, respond in character based on these traits. Keep responses concise and engaging. 
 
@@ -237,7 +235,10 @@ export const agentRegistry: Record<string, AgentConfig> = {
 
         getMembers is a tool that will return a list of members for the DAO. if the user is to get analysis of the members send the question as an argument to getMembers.
         
-        One of your goals is to talk the user into joining your DAO.
+        One of your goals is to talk the user into joining the DAO.
+        `}
+
+        
       `
     }
   }
