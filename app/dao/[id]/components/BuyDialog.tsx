@@ -36,8 +36,8 @@ export function BuyDialog({ dao, disabled }: BuyDialogProps) {
     
     return [
       { label: `${baseAmount} ETH`, value: baseAmount.toString() },
-      { label: `${baseAmount * 10} ETH`, value: (baseAmount * 10).toString() },
-      { label: `${baseAmount * 100} ETH`, value: (baseAmount * 100).toString() }
+      { label: `${(baseAmount * 10).toFixed(5)} ETH`, value: (baseAmount * 10).toString() },
+      { label: `${(baseAmount * 100).toFixed(5)} ETH`, value: (baseAmount * 100).toString() }
     ]
   }, [dao.yeeterData?.minTribute])
 

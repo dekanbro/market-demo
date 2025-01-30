@@ -10,14 +10,19 @@ import { DaoImage } from './DaoImage'
 import { CountdownTimer } from './CountdownTimer'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
-export function DaoDetails({ id }: { id: string }) {
-  const [dao, setDao] = useState<HydratedDaoItem | null>(null)
-  const [loading, setLoading] = useState(true)
+interface DaoDetailsProps {
+  id: string
+  initialDao: HydratedDaoItem
+}
+
+export function DaoDetails({ id, initialDao }: DaoDetailsProps) {
+  const [dao, setDao] = useState<HydratedDaoItem>(initialDao)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function fetchDao() {
+    async function refreshDao() {
       try {
         const res = await fetch(`/api/dao/${id}`)
         if (!res.ok) throw new Error('Failed to fetch DAO')
@@ -25,17 +30,17 @@ export function DaoDetails({ id }: { id: string }) {
         setDao(data)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to fetch DAO')
-      } finally {
-        setLoading(false)
       }
     }
 
-    if (id) fetchDao()
+    // Optionally refresh data periodically
+    const interval = setInterval(refreshDao, 30000)
+    return () => clearInterval(interval)
   }, [id])
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
-  if (!dao) return <div>DAO not found</div>
+  if (error) {
+    return <div>Error: {error}</div>
+  }
 
   return (
     <div className="container mx-auto py-4">
@@ -45,22 +50,38 @@ export function DaoDetails({ id }: { id: string }) {
       </Link>
 
       <div className="grid md:grid-cols-2 gap-8 mb-8">
-        <DaoImage dao={dao} />
+        <ErrorBoundary fallback={<div>Error loading DAO image</div>}>
+          <DaoImage dao={dao} />
+        </ErrorBoundary>
+        
         <div className="space-y-8">
-          <DaoHeader dao={dao} />
+          <ErrorBoundary fallback={<div>Error loading DAO header</div>}>
+            <DaoHeader dao={dao} />
+          </ErrorBoundary>
+
           {dao.yeeterData && (
-            <CountdownTimer 
-              startTime={dao.yeeterData.startTime} 
-              endTime={dao.yeeterData.endTime}
-            />
+            <ErrorBoundary fallback={<div>Error loading countdown</div>}>
+              <CountdownTimer 
+                startTime={dao.yeeterData.startTime} 
+                endTime={dao.yeeterData.endTime}
+              />
+            </ErrorBoundary>
           )}
-          <DaoInfo dao={dao} />
-          <DaoActions dao={dao} />
+
+          <ErrorBoundary fallback={<div>Error loading DAO info</div>}>
+            <DaoInfo dao={dao} />
+          </ErrorBoundary>
+
+          <ErrorBoundary fallback={<div>Error loading DAO actions</div>}>
+            <DaoActions dao={dao} />
+          </ErrorBoundary>
         </div>
       </div>
       
-      <div className="border-t pt-8 mt-12">
-        <DaoTabs dao={dao} />
+      <div className="border-t pt-8">
+        <ErrorBoundary fallback={<div>Error loading DAO tabs</div>}>
+          <DaoTabs dao={dao} />
+        </ErrorBoundary>
       </div>
     </div>
   )

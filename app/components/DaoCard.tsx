@@ -9,17 +9,26 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ExternalLinkIcon } from 'lucide-react'
+import { useMarketMaker } from '@/app/hooks/useMarketMaker'
+import { BuyDialog } from '../dao/[id]/components/BuyDialog'
 
 export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+
+
+  const now = Math.floor(Date.now() / 1000)
+  const isPresaleActive = dao.yeeterData && 
+    now >= Number(dao.yeeterData.startTime) && 
+    now <= Number(dao.yeeterData.endTime)
 
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     setIsLoading(true)
     router.push(`/dao/${dao.id}`)
   }
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow relative">
       {isLoading && (
@@ -120,9 +129,12 @@ export function DaoCard({ dao }: { dao: HydratedDaoItem }) {
           </p>
         )}
         <div className="flex justify-between items-center">
-          <Button variant="outline" size="sm">
-            {dao.price > 0 ? `Buy for ${dao.price} ETH` : 'Buy'}
-          </Button>
+          {isPresaleActive && (
+            <BuyDialog 
+              dao={dao} 
+              disabled={!isPresaleActive || dao.comingSoon}
+            />
+          )}
           <Link href={`/dao/${dao.id}`} onClick={handleNavigate}>
             <Button variant="ghost" size="sm">View Details</Button>
           </Link>

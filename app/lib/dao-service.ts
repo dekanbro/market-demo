@@ -500,3 +500,29 @@ export async function getDaoById(id: string, chainId: string = CHAIN_ID.BASE): P
     return null
   }
 } 
+
+export const daoService = {
+  getDaos: async (filter?: string) => {
+    try {
+      const featuredIds = FEATURED_DAOS.map(dao => dao.id)
+      const createdAfter = Math.floor(Date.now() / 1000) - (60 * 60 * 24 * 30) // 30 days ago
+
+      return await fetchFeaturedAndRecentDaos({
+        filter,
+        featuredIds,
+        createdAfter: createdAfter.toString()
+      })
+    } catch (error) {
+      console.error("[DAO] Error:", error)
+      return {
+        daos: [],
+        error: error instanceof Error ? error.message : 'Failed to fetch DAOs',
+        loading: false
+      }
+    }
+  },
+
+  getDao: async (id: string, chainId?: string) => {
+    return getDaoById(id, chainId)
+  }
+} 
