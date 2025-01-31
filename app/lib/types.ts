@@ -86,7 +86,7 @@ export interface DaoResponse {
 }
 
 // Add new types for the extra fields
-export type DaoStatus = 'featured' | 'active' | 'failed'
+export type DaoStatus = 'featured' | undefined
 export type DaoType = 'none' | 'super' // extend as needed
 
 // Add interface for hydrated DAO
@@ -113,6 +113,7 @@ export interface YeeterData {
   minTribute: string;
   goal: string;
   balance: string;
+  goalAchieved: boolean;
   yeetCount: string;
   vault: string;
   dao: {

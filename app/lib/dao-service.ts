@@ -268,7 +268,7 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     }
   }
 
-  let status: DaoStatus = 'failed'
+  let status: DaoStatus
   if (isFeatured || isSpecialDao) status = 'featured'
 
   let type: DaoType = 'none'
