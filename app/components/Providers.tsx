@@ -17,6 +17,12 @@ export function Providers({ children }: ProvidersProps) {
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
       config={{
         loginMethods: ['email', 'wallet'],
+        // loginMethods: ['wallet'],
+        appearance: {
+          theme: 'light',
+          accentColor: '#676FFF',
+          showWalletLoginFirst: true,
+        },
         defaultChain: base,
         supportedChains: [base]
       }}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useEnsName, useEnsAvatar } from 'wagmi';
+import { mainnet } from 'wagmi/chains'
 
 interface EnsProfile {
   name: string | null;
@@ -15,12 +16,13 @@ export function truncateAddress(address: string) {
 export function useEnsProfile(address?: string) {
   const { data: ensName, isLoading: isLoadingName } = useEnsName({
     address: address as `0x${string}`,
-    chainId: 1
+    chainId: mainnet.id
   });
 
   const { data: avatar, isLoading: isLoadingAvatar } = useEnsAvatar({
     name: ensName || undefined,
-    chainId: 1
+    chainId: mainnet.id,
+
   });
 
   const profile: EnsProfile | null = address ? {
