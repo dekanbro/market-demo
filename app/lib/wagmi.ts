@@ -1,5 +1,5 @@
 import { http, createConfig } from '@wagmi/core'
-import { base, baseGoerli } from 'viem/chains'
+import { base, baseGoerli, mainnet } from 'viem/chains'
 import { createClient } from 'viem'
 import { QueryClient } from '@tanstack/react-query'
 
@@ -8,10 +8,11 @@ export const queryClient = new QueryClient()
 
 // Create wagmi config
 export const config = createConfig({
-  chains: [base, baseGoerli],
+  chains: [base, baseGoerli, mainnet],
   transports: {
     [base.id]: http(process.env.NEXT_PUBLIC_RPC_URL),
-    [baseGoerli.id]: http('https://goerli.base.org')
+    [baseGoerli.id]: http('https://goerli.base.org'),
+    [mainnet.id]: http(process.env.NEXT_PUBLIC_RPC_URL),
   },
 })
 

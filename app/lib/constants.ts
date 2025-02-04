@@ -41,6 +41,11 @@ export const FEATURED_DAOS = [
     agentImage: undefined,
     agentName: undefined,
   },
+  {
+    id: '0xdcb641f71fb195935e0d8dd1dd4ab448e926cdbd', // RGCVIII
+    agentImage: undefined,
+    agentName: undefined,
+  }
 ] as const
 
 export const SUPER_AGENTS = [

@@ -24,6 +24,7 @@ export function useEnsProfile(address?: string) {
     chainId: mainnet.id,
 
   });
+  console.log(ensName, avatar);
 
   const profile: EnsProfile | null = address ? {
     name: ensName || null,

@@ -24,6 +24,7 @@ export function UserProfile({
   agentName
 }: UserProfileProps) {
   const { profile, loading: ensLoading } = useEnsProfile(address)
+  console.log('profile', profile)
   const { dao, loading: daoLoading } = useDaoById(isAgent ? address : undefined)
   
   if (!address || (ensLoading && !isAgent)) return null
