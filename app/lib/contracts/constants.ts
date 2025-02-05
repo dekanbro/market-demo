@@ -30,7 +30,7 @@ export const DEFAULT_YEETER_VALUES = {
     "0x4a9a27d614a74ee5524909ca27bdbcbb7ed3b315",
   ], // yeeter team, daohaus eco fund 
   feeAmounts: ["5000", "5000"], // .5% fees
-  multiplier: "100000",
+  multiplier: "1000000",
 }
 
 export const DEFAULT_GOAL = "1000000000000000000" // 1
