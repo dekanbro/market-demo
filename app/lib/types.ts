@@ -102,6 +102,9 @@ export interface HydratedDaoItem extends DaoItem {
   agentImage?: string;
   agentName?: string;
   marketMakerShamanAddress?: string;
+  socialsBot?: string;
+  farcasterBot?: string;
+  discordBot?: string;
 }
 
 export interface YeeterData {

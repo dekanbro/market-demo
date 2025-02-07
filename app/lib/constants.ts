@@ -30,21 +30,33 @@ export const FEATURED_DAOS = [
     id: '0x4d5a5b4a679b10038e1677c84cb675d10d29fffd', // RGCVII
     agentImage: undefined,
     agentName: undefined,
+    socialsBot: undefined,
+    farcasterBot: undefined,
+    discordBot: undefined,
   },
   {
     id: '0x0d8d4d5de4ea1ed04bfd94375a8f34078194ff61', // IRON
     agentImage: undefined,
     agentName: undefined,
+    socialsBot: undefined,
+    farcasterBot: undefined,
+    discordBot: undefined,
   },
   {
     id: '0xc08ee7e26620da30e04ee85f23e00be189d4e2ec', // FLY
     agentImage: undefined,
     agentName: undefined,
+    socialsBot: undefined,
+    farcasterBot: undefined,
+    discordBot: undefined,
   },
   {
     id: '0xdcb641f71fb195935e0d8dd1dd4ab448e926cdbd', // RGCVIII
     agentImage: undefined,
     agentName: undefined,
+    socialsBot: undefined,
+    farcasterBot: undefined,
+    discordBot: undefined,
   }
 ] as const
 
@@ -69,11 +81,13 @@ export const AGENT_IDS = {
 export const SPECIAL_DAOS = {
   GNOSIS: [
     {
-      id: '0xf02fd4286917270cb94fbc13a0f4e1ed76f7e986',
-      chainId: '0x64',
-      name: 'Special DAO Name',
-      agentImage: 'https://hackmd.io/_uploads/HyB_WGudJl.png',
-      agentName: 'Queen Maelis',
+      id: "0xf02fd4286917270cb94fbc13a0f4e1ed76f7e986", // Your special DAO ID
+      chainId: "0x64",
+      agentImage: "https://hackmd.io/_uploads/HyB_WGudJl.png",
+      agentName: "Queen Maelis",
+      socialsBot: "https://x.com/Queen_Maelis",
+      farcasterBot: "https://warpcast.com/summoner",
+      discordBot: "https://discord.com/oauth2/authorize?client_id=1336798259548786871",
     }
   ]
 } as const

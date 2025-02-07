@@ -138,7 +138,7 @@ export function ChatWindow({ agentName, itemId, initialMessage, backgroundImage 
       <div className="flex-1 min-h-0 relative">
         {backgroundImage && (
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-5"
+            className="absolute inset-0 bg-cover bg-center opacity-60"
             style={{ backgroundImage: `url(${backgroundImage})` }}
           />
         )}
@@ -153,7 +153,7 @@ export function ChatWindow({ agentName, itemId, initialMessage, backgroundImage 
               >
                 <div
                   className={cn(
-                    "rounded-lg px-4 py-2 max-w-[85%] break-words",
+                    "rounded-lg px-4 py-2 max-w-[85%] break-words opacity-90",
                     message.user === 'You'
                       ? 'bg-primary text-primary-foreground'
                       : getMessageStyles(message.message)

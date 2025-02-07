@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { useProtectedAction } from '@/app/hooks/useProtectedAction'
 import { MessageSquare } from 'lucide-react'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 
 export function DaoImage({ dao }: { dao: HydratedDaoItem }) {
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -31,6 +32,16 @@ export function DaoImage({ dao }: { dao: HydratedDaoItem }) {
             fill
             className="object-cover"
           />
+          {dao.agentImage && (
+            <div className="absolute bottom-4 right-4">
+              <Avatar className="h-12 w-12 border-2 border-background shadow-lg">
+                <AvatarImage 
+                  src={dao.agentImage} 
+                  alt={dao.agentName || 'DAO Agent'} 
+                />
+              </Avatar>
+            </div>
+          )}
           <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
             <MessageSquare className="text-white opacity-0 hover:opacity-100 transition-opacity h-12 w-12" />
           </div>

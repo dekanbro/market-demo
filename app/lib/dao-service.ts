@@ -294,6 +294,15 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     // console.log("[DAO] Shaman ID:", shaman.shamanAddress, "Yeeter ID:", dao.yeeterData?.id)
     return shaman.shamanAddress.toLowerCase() !== dao.yeeterData?.id.toLowerCase()
   })
+
+  // Add console log to debug
+  console.log('Hydrating DAO:', {
+    id: dao.id,
+    isSpecialDao: Boolean(specialDao),
+    specialDaoData: specialDao,
+    socialsBot: specialDao?.socialsBot || featuredDao?.socialsBot
+  })
+
   return {
     ...dao,
     profile,
@@ -304,7 +313,10 @@ function hydrateDaoData(dao: DaoItem): HydratedDaoItem {
     isPresale,
     isSpecialDao,
     agentImage: specialDao?.agentImage || featuredDao?.agentImage || undefined,
-    marketMakerShamanAddress: marketMakerShaman?.shamanAddress || undefined
+    marketMakerShamanAddress: marketMakerShaman?.shamanAddress || undefined,
+    socialsBot: specialDao?.socialsBot || featuredDao?.socialsBot || undefined,
+    farcasterBot: specialDao?.farcasterBot || featuredDao?.farcasterBot || undefined,
+    discordBot: specialDao?.discordBot || featuredDao?.discordBot || undefined,
   }
 }
 
